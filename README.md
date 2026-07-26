@@ -1,14 +1,17 @@
 # React Router Route Links
 
-Makes route file paths in React Router v7 config files clickable in VS Code.
+Makes route file paths in React Router v7+ config files clickable in VS Code.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![VS Code](https://img.shields.io/badge/VS%20Code-%5E1.85.0-007ACC.svg)
 
+![RouteLinks banner](assets/linkedin-banner.png)
+
+
 ## The problem
 
 VS Code's TypeScript server only supports go-to-definition on real `import`
-statements. But in a React Router v7 `routes.ts` config, route modules are
+statements. But in a React Router v7+ `routes.ts` config, route modules are
 referenced as plain strings:
 
 ```ts

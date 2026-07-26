@@ -28,7 +28,7 @@ dependencies, no build step — it's plain JavaScript.
 
 1. Clone the repo and open the folder in VS Code
 2. Press `F5` (Run Extension) — opens a new Extension Development Host window
-3. Open a React Router v7 project there and try Ctrl+Click inside `app/routes.ts`
+3. Open a React Router v7+ project there and try Ctrl+Click inside `app/routes.ts`
 
 ## Package and test the .vsix locally
 
