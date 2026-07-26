@@ -1,0 +1,50 @@
+{
+  "name": "routelinks",
+  "displayName": "React Router Route Links",
+  "description": "Ctrl+Click on route file paths in React Router v7+ routes.ts config files",
+  "version": "0.0.1",
+  "publisher": "anparasan",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "react-router",
+    "routes",
+    "go to definition",
+    "document links"
+  ],
+  "main": "./src/extension.js",
+  "activationEvents": [
+    "onLanguage:typescript",
+    "onLanguage:javascript",
+    "onLanguage:typescriptreact",
+    "onLanguage:javascriptreact"
+  ],
+  "contributes": {
+    "configuration": {
+      "title": "React Router Route Links",
+      "properties": {
+        "reactRouterRouteLinks.fileNames": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["routes.ts", "routes.js", "routes.tsx", "routes.jsx"],
+          "description": "File names in which route path strings should become clickable links."
+        },
+        "reactRouterRouteLinks.extensions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [".tsx", ".ts", ".jsx", ".js", ".mdx", ".md"],
+          "description": "String literals ending with these extensions are treated as route file paths."
+        }
+      }
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Anparasan3/route-links"
+  }
+}
