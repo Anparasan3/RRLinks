@@ -1,60 +1,67 @@
 # React Router Route Links
 
-Makes route file paths in React Router v7 config files clickable.
+Makes route file paths in React Router v7 config files clickable in VS Code.
 
-In `app/routes.ts`:
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![VS Code](https://img.shields.io/badge/VS%20Code-%5E1.85.0-007ACC.svg)
+
+## The problem
+
+VS Code's TypeScript server only supports go-to-definition on real `import`
+statements. But in a React Router v7 `routes.ts` config, route modules are
+referenced as plain strings:
 
 ```ts
 import { type RouteConfig, index, route } from "@react-router/dev/routes";
 
 export default [
-  index("routes/home.tsx"),          // ← Ctrl+Click now opens routes/home.tsx
+  index("routes/home.tsx"),
   route("about", "routes/about.tsx"),
 ] satisfies RouteConfig;
 ```
 
-VS Code's TypeScript server only supports go-to-definition on real `import`
-paths, so these plain string arguments are normally inert. This extension
-registers a `DocumentLinkProvider` that turns any string literal ending in a
-known file extension into a real link — hover shows the underline, and
-Ctrl+Click (Cmd+Click on macOS) opens the file.
+Those strings are inert to VS Code — no Ctrl+Click, no quick navigation.
+Every time you want to check what `"routes/home.tsx"` actually renders, you're
+manually hunting through folders.
+
+## What this extension does
+
+It turns those route path strings into real, clickable links.
+
+Hover over `"routes/home.tsx"` and it underlines like a link. Ctrl+Click
+(Cmd+Click on macOS) opens the file directly — no manual searching, no
+breaking your flow to go dig through the file tree.
+
+## Install
+
+Search **"React Router Route Links"** in the VS Code Extensions panel, or:
+
+```bash
+code --install-extension anparasan.routelinks
+```
 
 ## Features
 
-- Works in `routes.ts` / `routes.js` / `routes.tsx` / `routes.jsx` (configurable)
-- Resolves paths relative to the routes file's directory (the `app/` dir),
+- Works automatically in `routes.ts` / `routes.js` / `routes.tsx` / `routes.jsx`
+- Resolves paths relative to the routes file's own directory (the `app/` dir),
   with fallbacks to the workspace root, `app/`, and `src/`
 - Only links to files that actually exist — a typo'd path simply won't
-  underline, which doubles as a lightweight sanity check
-- Zero dependencies, no build step, plain JavaScript
-
-## Install from the .vsix
-
-```bash
-code --install-extension routelinks-0.0.1.vsix
-```
-
-Or in VS Code: Extensions panel → `…` menu → **Install from VSIX…**
-
-## Develop / modify
-
-1. Open this folder in VS Code
-2. Press `F5` (Run Extension) — a new Extension Development Host window opens
-3. Open a React Router project there and try Ctrl+Click in `app/routes.ts`
-
-To rebuild the package after changes:
-
-```bash
-npm install -g @vscode/vsce
-vsce package
-```
+  underline, doubling as a lightweight sanity check
+- Zero dependencies, no build step, lightweight
 
 ## Settings
+
+Customize which files and extensions are treated as route links via
+`Settings → Extensions → React Router Route Links`, or in `settings.json`:
 
 | Setting | Default | Description |
 |---|---|---|
 | `reactRouterRouteLinks.fileNames` | `routes.ts`, `routes.js`, `routes.tsx`, `routes.jsx` | Which files get link treatment |
 | `reactRouterRouteLinks.extensions` | `.tsx`, `.ts`, `.jsx`, `.js`, `.mdx`, `.md` | String suffixes treated as route paths |
+
+## Found a bug or have a request?
+
+Open an issue on [GitHub](https://github.com/Anparasan3/route-links/issues).
 
 ## License
 
