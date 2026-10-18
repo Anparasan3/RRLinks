@@ -35,6 +35,12 @@ Hover over `"routes/home.tsx"` and it underlines like a link. Ctrl+Click
 (Cmd+Click on macOS) opens the file directly — no manual searching, no
 breaking your flow to go dig through the file tree.
 
+It also works the other way: in *any* `.ts`/`.js`/`.tsx`/`.jsx` file, a
+string like `"/api/someroute/:someId/some"` becomes clickable too, as long as
+that path is actually defined in `routes.ts` (including nested `route()`,
+`index()`, `layout()`, and `prefix()` calls) — Ctrl+Click jumps straight to
+the module that handles it.
+
 ## Install
 
 Search **"React Router Route Links"** in the VS Code Extensions panel, or:
