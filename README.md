@@ -56,7 +56,7 @@ code --install-extension anparasan.routelinks
   with fallbacks to the workspace root, `app/`, and `src/`
 - Only links to files that actually exist — a typo'd path simply won't
   underline, doubling as a lightweight sanity check
-- Zero dependencies, no build step, lightweight
+- Zero runtime dependencies, lightweight
 
 ## Settings
 

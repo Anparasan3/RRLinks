@@ -18,7 +18,19 @@
     "go to definition",
     "document links"
   ],
-  "main": "./src/extension.js",
+  "main": "./out/extension.js",
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -w -p ./",
+    "vscode:prepublish": "npm run compile",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.3",
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.5.0"
+  },
   "activationEvents": [
     "onLanguage:typescript",
     "onLanguage:javascript",
@@ -31,13 +43,17 @@
       "properties": {
         "reactRouterRouteLinks.fileNames": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "default": ["routes.ts", "routes.js", "routes.tsx", "routes.jsx"],
           "description": "File names in which route path strings should become clickable links."
         },
         "reactRouterRouteLinks.extensions": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "default": [".tsx", ".ts", ".jsx", ".js", ".mdx", ".md"],
           "description": "String literals ending with these extensions are treated as route file paths."
         }
