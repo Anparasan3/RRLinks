@@ -1,6 +1,8 @@
 # React Router Route Links
 
-Makes route file paths in React Router v7+ config files clickable in VS Code.
+Makes route file paths **and** API route strings in React Router v7+ (and
+Remix) projects clickable in VS Code — Ctrl+Click any of them to jump
+straight to the file that handles it.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![VS Code](https://img.shields.io/badge/VS%20Code-%5E1.85.0-007ACC.svg)
@@ -54,6 +56,8 @@ code --install-extension anparasan.routelinks
 - Works automatically in `routes.ts` / `routes.js` / `routes.tsx` / `routes.jsx`
 - Resolves paths relative to the routes file's own directory (the `app/` dir),
   with fallbacks to the workspace root, `app/`, and `src/`
+- Also links matching route/API path strings (e.g. `/api/users/:id`) found in
+  *any* `.ts`/`.js`/`.tsx`/`.jsx` file back to the route module that handles them
 - Only links to files that actually exist — a typo'd path simply won't
   underline, doubling as a lightweight sanity check
 - Zero runtime dependencies, lightweight
