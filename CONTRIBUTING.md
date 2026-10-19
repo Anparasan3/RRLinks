@@ -107,35 +107,38 @@ actually triggers the workflow below.
 ### Preview release
 
 The VS Code Marketplace rejects a semver prerelease version string outright
-(`vsce publish` errors on `0.0.5-preview.0`), so `package.json`'s `version`
+(`vsce publish` errors on `0.0.5-preview`), so `package.json`'s `version`
 must always stay a plain `X.Y.Z` — only the **git tag** carries a
-`-preview.N` suffix. `bun run release:preview` (see
-[`scripts/release-preview.sh`](scripts/release-preview.sh)) handles that
-split for you:
+`-preview` suffix. The Marketplace also refuses to publish the same version
+number twice, even across the release/pre-release tracks, so — just like a
+stable release — every preview release bumps the version forward; there's
+no way to cut a second preview build "of the same version". `bun run
+release:preview` (see
+[`scripts/release-preview.sh`](scripts/release-preview.sh)) handles the
+plain-version/tagged-suffix split for you:
 
 ```bash
-bun run release:preview patch   # bump to a new target version, tag its first preview: v1.2.4-preview.0
+bun run release:preview patch   # or: minor / major -> v1.2.4-preview
 git push origin HEAD --follow-tags
 
-# ...fix something, cut another preview of the SAME target version (no bump):
-bun run release:preview
+# ...fix something, cut another preview (bumps again, there's no re-using 1.2.4):
+bun run release:preview patch   # -> v1.2.5-preview
 git push origin HEAD --follow-tags
 ```
 
-The workflow strips the `-preview.N` suffix before comparing the tag to
+The workflow strips the `-preview` suffix before comparing the tag to
 `package.json`, publishes to the VS Code Marketplace's separate
 **Pre-Release** track (`vsce publish --pre-release`) instead of the normal
 release track, and marks the GitHub Release as a **Pre-release** rather than
 "Latest". Users only get preview builds if they explicitly opt in via
 "Switch to Pre-Release Version" in VS Code.
 
-Once a previewed version is ready to ship as stable, `package.json` is
-already sitting at that version (the bump already happened when you cut the
-first preview), so `bun run release` has nothing to bump — tag it directly
-instead:
+Once a previewed version is good enough to ship as stable, it ships under
+the **next** version number, not the previewed one (which is already
+consumed on the Marketplace) — just a normal stable release:
 
 ```bash
-git tag -a v1.2.4 -m v1.2.4   # whatever exact version the previews were building up to
+bun run release patch   # or minor / major, whatever's appropriate
 git push --follow-tags
 ```
 
