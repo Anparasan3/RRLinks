@@ -86,19 +86,47 @@ before packaging.
 
 Releases are automated via GitHub Actions
 ([`.github/workflows/publish.yml`](.github/workflows/publish.yml)), triggered
-by pushing a version tag:
+by pushing a version tag. Cutting that tag is a single command — nothing
+else needs to be done by hand.
+
+### Stable release
 
 ```bash
-# bump "version" in package.json first, then:
-git add . && git commit -m "v0.0.2: description of changes"
-git tag v0.0.2
-git push origin main --tags
+bun run release patch   # or: minor / major
+git push --follow-tags
 ```
 
-The workflow installs dependencies, verifies the tag matches `package.json`'s
-version, packages the extension (compiling TypeScript via
-`vscode:prepublish`), and publishes it automatically using the `VSCE_PAT`
-repository secret.
+`bun run release` is `bun pm version` under the hood — it bumps `version` in
+`package.json`, commits it, and creates a matching `vX.Y.Z` git tag, all
+locally. Nothing is pushed until `git push --follow-tags`, which is what
+actually triggers the workflow below.
+
+### Preview release
+
+A semver prerelease suffix marks a build as a preview instead of stable:
+
+```bash
+bun run release:preview   # v1.2.3 -> v1.2.4-preview.0, repeatable -> .1, .2, ...
+git push --follow-tags
+```
+
+The workflow detects the `-preview.N` suffix and publishes it to the VS Code
+Marketplace's separate **Pre-Release** track (`vsce publish --pre-release`)
+instead of the normal release track, and marks the GitHub Release as a
+**Pre-release** rather than "Latest". Users only get preview builds if they
+explicitly opt in via "Switch to Pre-Release Version" in VS Code.
+
+To ship a previewed version as stable once it's ready, don't run `patch`
+again from the preview version (it skips ahead) — set the exact version
+instead: `bun run release 1.2.4`.
+
+### What the workflow does
+
+It installs dependencies, verifies the tag matches `package.json`'s version,
+runs the tests, packages the extension (compiling TypeScript via
+`vscode:prepublish`), publishes it to the Marketplace using the `VSCE_PAT`
+repository secret, and creates a GitHub Release for the tag with
+auto-generated notes (from merged commits) and the `.vsix` attached.
 
 ### Manual publish (fallback)
 

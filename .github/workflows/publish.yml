@@ -9,6 +9,8 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # needed for `gh release create`
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -25,25 +27,39 @@ jobs:
         run: bun install
 
       - name: Verify tag matches package.json version
+        id: tag
         run: |
-          PKG_VERSION="v$(bun -e "console.log(require('./package.json').version)")"
           TAG_VERSION="${GITHUB_REF#refs/tags/}"
+          PKG_VERSION="v$(bun -e "console.log(require('./package.json').version)")"
           if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
             echo "Tag ($TAG_VERSION) does not match package.json version ($PKG_VERSION)"
             exit 1
+          fi
+
+          # A semver prerelease suffix (v1.2.3-preview.1) marks a preview build:
+          # published to the Marketplace's separate Pre-Release track and
+          # flagged as a GitHub "Pre-release" rather than the latest stable one.
+          echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
+          if [[ "$TAG_VERSION" == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Run tests
         run: bun test
 
       - name: Package extension
-        run: vsce package
+        run: vsce package ${{ steps.tag.outputs.prerelease == 'true' && '--pre-release' || '' }}
 
       - name: Publish to VS Code Marketplace
-        run: vsce publish -p ${{ secrets.VSCE_PAT }}
+        run: vsce publish -p ${{ secrets.VSCE_PAT }} ${{ steps.tag.outputs.prerelease == 'true' && '--pre-release' || '' }}
 
-      - name: Upload .vsix as release artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: vsix-package
-          path: "*.vsix"
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.tag.outputs.version }}" *.vsix \
+            --title "${{ steps.tag.outputs.version }}" \
+            --generate-notes \
+            ${{ steps.tag.outputs.prerelease == 'true' && '--prerelease' || '' }}

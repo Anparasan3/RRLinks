@@ -23,7 +23,9 @@
     "compile": "tsc -p ./",
     "watch": "tsc -w -p ./",
     "vscode:prepublish": "npm run compile",
-    "test": "bun test"
+    "test": "bun test",
+    "release": "bun pm version",
+    "release:preview": "bun pm version prerelease --preid=preview"
   },
   "devDependencies": {
     "@types/bun": "^1.4.3",
