@@ -59,6 +59,15 @@ jobs:
       - name: Package extension
         run: vsce package ${{ steps.tag.outputs.prerelease == 'true' && '--pre-release' || '' }}
 
+      - name: Cache VS Code test download
+        uses: actions/cache@v4
+        with:
+          path: .vscode-test
+          key: ${{ runner.os }}-vscode-test
+
+      - name: Verify extension installs correctly
+        run: bun scripts/verify-install.ts *.vsix
+
       - name: Publish to VS Code Marketplace
         run: vsce publish -p ${{ secrets.VSCE_PAT }} ${{ steps.tag.outputs.prerelease == 'true' && '--pre-release' || '' }}
 

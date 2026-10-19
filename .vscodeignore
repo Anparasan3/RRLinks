@@ -11,3 +11,4 @@ scripts/**
 tsconfig.json
 **/*.map
 bun.lock
+.vscode-test/**

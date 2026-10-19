@@ -23,6 +23,9 @@ route-links/
 │   ├── fileResolution.ts           # shared "does this candidate path exist" helper
 │   └── config.ts                   # reads the extension's vscode settings
 ├── out/                            # compiled JS (gitignored, built by tsc)
+├── scripts/
+│   ├── release-preview.sh          # cuts a vX.Y.Z-preview.N tag without touching package.json's version
+│   └── verify-install.ts           # installs a .vsix into a throwaway VS Code and checks it worked
 ├── icon.png                        # marketplace icon (128×128)
 ├── README.md                       # user-facing, shown on Marketplace
 ├── CONTRIBUTING.md                 # this file
@@ -140,8 +143,12 @@ git push --follow-tags
 
 It installs dependencies, verifies the tag matches `package.json`'s version,
 runs the tests, packages the extension (compiling TypeScript via
-`vscode:prepublish`), publishes it to the Marketplace using the `VSCE_PAT`
-repository secret, and creates a GitHub Release for the tag with
+`vscode:prepublish`), **installs the freshly built `.vsix` into a real,
+throwaway VS Code** ([`scripts/verify-install.ts`](scripts/verify-install.ts),
+via `@vscode/test-electron`) and confirms it shows up in
+`--list-extensions` — failing the whole run before anything is published if
+it doesn't install cleanly — then publishes to the Marketplace using the
+`VSCE_PAT` repository secret, and creates a GitHub Release for the tag with
 auto-generated notes (from merged commits) and the `.vsix` attached.
 
 ### Manual publish (fallback)
