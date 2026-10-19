@@ -58,11 +58,15 @@ jobs:
           git push origin "$TAG"
           echo "Pushed $TAG — the publish job will pick it up from here."
 
-  publish:
+  # Builds the .vsix once and verifies it installs. Every later job reuses
+  # this exact artifact instead of rebuilding — what gets published and what
+  # got install-tested are then guaranteed to be the same file.
+  build-and-verify:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
-    permissions:
-      contents: write # needed for `gh release create`
+    outputs:
+      version: ${{ steps.tag.outputs.version }}
+      prerelease: ${{ steps.tag.outputs.prerelease }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -120,14 +124,49 @@ jobs:
       - name: Verify extension installs correctly
         run: bun scripts/verify-install.ts *.vsix
 
+      - name: Upload .vsix
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix
+          path: "*.vsix"
+
+  publish-marketplace:
+    needs: build-and-verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download .vsix
+        uses: actions/download-artifact@v4
+        with:
+          name: vsix
+
+      - name: Install vsce
+        run: npm install -g @vscode/vsce
+
       - name: Publish to VS Code Marketplace
-        run: vsce publish -p ${{ secrets.VSCE_PAT }} ${{ steps.tag.outputs.prerelease == 'true' && '--pre-release' || '' }}
+        run: |
+          vsce publish -p ${{ secrets.VSCE_PAT }} \
+            --packagePath *.vsix \
+            ${{ needs.build-and-verify.outputs.prerelease == 'true' && '--pre-release' || '' }}
+
+  create-release:
+    needs: [build-and-verify, publish-marketplace]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # needed for `gh release create`
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Download .vsix
+        uses: actions/download-artifact@v4
+        with:
+          name: vsix
 
       - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "${{ steps.tag.outputs.version }}" *.vsix \
-            --title "${{ steps.tag.outputs.version }}" \
+          gh release create "${{ needs.build-and-verify.outputs.version }}" *.vsix \
+            --title "${{ needs.build-and-verify.outputs.version }}" \
             --generate-notes \
-            ${{ steps.tag.outputs.prerelease == 'true' && '--prerelease' || '' }}
+            ${{ needs.build-and-verify.outputs.prerelease == 'true' && '--prerelease' || '' }}
