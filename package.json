@@ -1,7 +1,7 @@
 {
   "name": "routelinks",
   "displayName": "React Router Route Links",
-  "description": "Ctrl+Click on route file paths in React Router v7+ routes.ts config files",
+  "description": "Ctrl+Click route file paths and API route strings in React Router v7+ / Remix routes.ts configs to jump straight to the file that handles them",
   "version": "0.0.6",
   "publisher": "anparasan",
   "license": "MIT",
@@ -10,14 +10,31 @@
     "vscode": "^1.85.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Programming Languages"
   ],
   "keywords": [
     "react-router",
+    "react-router-dom",
+    "react-router-v7",
+    "remix",
     "routes",
+    "routing",
+    "file-based routing",
     "go to definition",
-    "document links"
+    "document links",
+    "navigation",
+    "api routes",
+    "typescript"
   ],
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
+  "homepage": "https://github.com/Anparasan3/route-links#readme",
+  "bugs": {
+    "url": "https://github.com/Anparasan3/route-links/issues"
+  },
   "main": "./out/extension.js",
   "scripts": {
     "compile": "tsc -p ./",
