@@ -1,11 +1,14 @@
 name: Publish Extension
 
-# Runs whenever a tag like v0.0.* is pushed. Can also be triggered manually
-# via the Actions tab ("Run workflow") to cut that tag in the first place —
-# the cut-tag job just bumps/commits/tags/pushes, then the tag push it makes
-# triggers this same workflow again through the normal `push: tags:` path,
-# so the actual publish logic below only ever runs once, the same way
-# whether a human pushed the tag locally or triggered it from the UI.
+# Runs whenever a tag like v0.0.* is pushed, or manually via the Actions tab
+# ("Run workflow") to cut that tag in the first place.
+#
+# A pushed tag never retriggers a second workflow run when the push is made
+# with the default GITHUB_TOKEN from inside a job — GitHub explicitly
+# suppresses that to prevent infinite loops. So a manual run can't just push
+# a tag and rely on `push: tags:` picking it up afterwards; instead
+# build-and-verify runs in the SAME run as cut-tag (via `needs:`), checking
+# out the tag cut-tag just created.
 on:
   push:
     tags:
@@ -31,6 +34,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      tag: ${{ steps.cut.outputs.tag }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -41,6 +46,7 @@ jobs:
           bun-version: latest
 
       - name: Cut and push the release tag
+        id: cut
         run: |
           # Reuses the same scripts a human would run locally, so the manual
           # and local paths can never diverge in behavior.
@@ -56,13 +62,14 @@ jobs:
           TAG=$(git tag --points-at HEAD)
           git push origin HEAD:"${{ github.ref_name }}"
           git push origin "$TAG"
-          echo "Pushed $TAG — the publish job will pick it up from here."
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
   # Builds the .vsix once and verifies it installs. Every later job reuses
   # this exact artifact instead of rebuilding — what gets published and what
   # got install-tested are then guaranteed to be the same file.
   build-and-verify:
-    if: github.event_name == 'push'
+    needs: cut-tag
+    if: always() && (needs.cut-tag.result == 'success' || needs.cut-tag.result == 'skipped')
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.tag.outputs.version }}
@@ -70,6 +77,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
+        with:
+          # On a manual run there's no tag ref to default to yet — check out
+          # the one cut-tag just pushed. On a tag push, github.ref_name IS
+          # that tag already.
+          ref: ${{ github.event_name == 'workflow_dispatch' && needs.cut-tag.outputs.tag || github.ref_name }}
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -82,10 +94,14 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Verify tag matches package.json version
+      - name: Resolve tag and verify it matches package.json version
         id: tag
         run: |
-          TAG_VERSION="${GITHUB_REF#refs/tags/}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG_VERSION="${{ needs.cut-tag.outputs.tag }}"
+          else
+            TAG_VERSION="${GITHUB_REF#refs/tags/}"
+          fi
 
           # A semver prerelease suffix (v1.2.3-preview.1) marks a preview build,
           # published to the Marketplace's separate Pre-Release track and
