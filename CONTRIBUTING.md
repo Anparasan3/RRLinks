@@ -103,22 +103,38 @@ actually triggers the workflow below.
 
 ### Preview release
 
-A semver prerelease suffix marks a build as a preview instead of stable:
+The VS Code Marketplace rejects a semver prerelease version string outright
+(`vsce publish` errors on `0.0.5-preview.0`), so `package.json`'s `version`
+must always stay a plain `X.Y.Z` — only the **git tag** carries a
+`-preview.N` suffix. `bun run release:preview` (see
+[`scripts/release-preview.sh`](scripts/release-preview.sh)) handles that
+split for you:
 
 ```bash
-bun run release:preview   # v1.2.3 -> v1.2.4-preview.0, repeatable -> .1, .2, ...
-git push --follow-tags
+bun run release:preview patch   # bump to a new target version, tag its first preview: v1.2.4-preview.0
+git push origin HEAD --follow-tags
+
+# ...fix something, cut another preview of the SAME target version (no bump):
+bun run release:preview
+git push origin HEAD --follow-tags
 ```
 
-The workflow detects the `-preview.N` suffix and publishes it to the VS Code
-Marketplace's separate **Pre-Release** track (`vsce publish --pre-release`)
-instead of the normal release track, and marks the GitHub Release as a
-**Pre-release** rather than "Latest". Users only get preview builds if they
-explicitly opt in via "Switch to Pre-Release Version" in VS Code.
+The workflow strips the `-preview.N` suffix before comparing the tag to
+`package.json`, publishes to the VS Code Marketplace's separate
+**Pre-Release** track (`vsce publish --pre-release`) instead of the normal
+release track, and marks the GitHub Release as a **Pre-release** rather than
+"Latest". Users only get preview builds if they explicitly opt in via
+"Switch to Pre-Release Version" in VS Code.
 
-To ship a previewed version as stable once it's ready, don't run `patch`
-again from the preview version (it skips ahead) — set the exact version
-instead: `bun run release 1.2.4`.
+Once a previewed version is ready to ship as stable, `package.json` is
+already sitting at that version (the bump already happened when you cut the
+first preview), so `bun run release` has nothing to bump — tag it directly
+instead:
+
+```bash
+git tag -a v1.2.4 -m v1.2.4   # whatever exact version the previews were building up to
+git push --follow-tags
+```
 
 ### What the workflow does
 

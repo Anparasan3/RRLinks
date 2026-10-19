@@ -30,21 +30,28 @@ jobs:
         id: tag
         run: |
           TAG_VERSION="${GITHUB_REF#refs/tags/}"
+
+          # A semver prerelease suffix (v1.2.3-preview.1) marks a preview build,
+          # published to the Marketplace's separate Pre-Release track and
+          # flagged as a GitHub "Pre-release". The Marketplace rejects a
+          # prerelease version string outright, so package.json must always
+          # carry just the plain base version (1.2.3) — only the git tag gets
+          # the -preview.N suffix. Strip it off before comparing the two.
+          if [[ "$TAG_VERSION" == *-* ]]; then
+            BASE_VERSION="${TAG_VERSION%%-*}"
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            BASE_VERSION="$TAG_VERSION"
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
           PKG_VERSION="v$(bun -e "console.log(require('./package.json').version)")"
-          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
-            echo "Tag ($TAG_VERSION) does not match package.json version ($PKG_VERSION)"
+          if [ "$PKG_VERSION" != "$BASE_VERSION" ]; then
+            echo "Tag's base version ($BASE_VERSION) does not match package.json version ($PKG_VERSION)"
             exit 1
           fi
 
-          # A semver prerelease suffix (v1.2.3-preview.1) marks a preview build:
-          # published to the Marketplace's separate Pre-Release track and
-          # flagged as a GitHub "Pre-release" rather than the latest stable one.
           echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
-          if [[ "$TAG_VERSION" == *-* ]]; then
-            echo "prerelease=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "prerelease=false" >> "$GITHUB_OUTPUT"
-          fi
 
       - name: Run tests
         run: bun test
