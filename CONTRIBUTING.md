@@ -142,6 +142,16 @@ bun run release patch   # or minor / major, whatever's appropriate
 git push --follow-tags
 ```
 
+### Triggering a release without a terminal
+
+Both commands above work from the Actions tab too: open **Publish
+Extension** → **Run workflow**, pick a branch, a channel (`stable` /
+`preview`), and a version bump (`patch` / `minor` / `major`). A separate
+`cut-tag` job does exactly what `bun run release`/`release:preview` do
+locally — bump, commit, tag, push — and that push then triggers the same
+`publish` job described below, so a manual run behaves identically to a
+local one.
+
 ### What the workflow does
 
 It installs dependencies, verifies the tag matches `package.json`'s version,
