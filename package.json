@@ -2,7 +2,7 @@
   "name": "routelinks",
   "displayName": "React Router Route Links",
   "description": "Ctrl+Click route file paths and API route strings in React Router v7+ / Remix routes.ts configs to jump straight to the file that handles them",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "publisher": "anparasan",
   "license": "MIT",
   "icon": "icon.png",
