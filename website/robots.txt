@@ -1,0 +1,6 @@
+# https://anparasan3.github.io/route-links/robots.txt
+
+User-agent: *
+Allow: /
+
+Sitemap: https://anparasan3.github.io/route-links/sitemap.xml

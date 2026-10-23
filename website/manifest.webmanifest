@@ -1,0 +1,17 @@
+{
+  "name": "React Router Route Links",
+  "short_name": "RouteLinks",
+  "description": "Make React Router v7 and Remix route strings clickable in VS Code.",
+  "start_url": "/route-links/",
+  "scope": "/route-links/",
+  "display": "standalone",
+  "theme_color": "#0b0d12",
+  "background_color": "#0b0d12",
+  "icons": [
+    {
+      "src": "assets/icon.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    }
+  ]
+}
