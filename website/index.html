@@ -24,6 +24,8 @@
 
 <a class="skip-link" href="#main">Skip to content</a>
 
+<div class="scroll-progress" aria-hidden="true"><span id="scrollProgress"></span></div>
+
 <header class="site-header" id="top">
   <div class="container header-inner">
     <a class="brand" href="#top">
@@ -52,6 +54,9 @@
   <!-- ============================ HERO ============================ -->
   <section class="hero">
     <div class="hero-glow" aria-hidden="true"></div>
+    <div class="hero-orb hero-orb-a" aria-hidden="true"></div>
+    <div class="hero-orb hero-orb-b" aria-hidden="true"></div>
+    <div class="hero-grid-lines" aria-hidden="true"></div>
     <div class="container hero-grid">
 
       <div class="hero-copy">
@@ -92,7 +97,7 @@
 
       <!-- ---------------------- INTERACTIVE DEMO ---------------------- -->
       <div class="hero-demo">
-        <div class="editor" id="demo">
+        <div class="editor" id="demo" data-tilt>
           <div class="editor-titlebar">
             <span class="traffic" aria-hidden="true"><i></i><i></i><i></i></span>
             <div class="tabs" role="tablist" aria-label="Demo files">
@@ -152,7 +157,38 @@
         </div>
       </div>
     </div>
+
+    <a class="scroll-cue" href="#problem" aria-label="Scroll to the problem section">
+      <span class="scroll-cue-label">Scroll</span>
+      <span class="scroll-cue-track" aria-hidden="true"><span class="scroll-cue-dot"></span></span>
+    </a>
   </section>
+
+  <!-- ============================ MARQUEE ============================ -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <div class="marquee-group">
+        <span class="marquee-item">routes/home.tsx</span><span class="marquee-sep">&#8599;</span>
+        <span class="marquee-item">/about</span><span class="marquee-sep">&#8599;</span>
+        <span class="marquee-item">routes/api/user.tsx</span><span class="marquee-sep">&#8599;</span>
+        <span class="marquee-item">/api/users/:id</span><span class="marquee-sep">&#8599;</span>
+        <span class="marquee-item">index()</span><span class="marquee-sep">&#8599;</span>
+        <span class="marquee-item">route()</span><span class="marquee-sep">&#8599;</span>
+        <span class="marquee-item">layout()</span><span class="marquee-sep">&#8599;</span>
+        <span class="marquee-item">prefix()</span><span class="marquee-sep">&#8599;</span>
+      </div>
+      <div class="marquee-group">
+        <span class="marquee-item">routes/home.tsx</span><span class="marquee-sep">&#8599;</span>
+        <span class="marquee-item">/about</span><span class="marquee-sep">&#8599;</span>
+        <span class="marquee-item">routes/api/user.tsx</span><span class="marquee-sep">&#8599;</span>
+        <span class="marquee-item">/api/users/:id</span><span class="marquee-sep">&#8599;</span>
+        <span class="marquee-item">index()</span><span class="marquee-sep">&#8599;</span>
+        <span class="marquee-item">route()</span><span class="marquee-sep">&#8599;</span>
+        <span class="marquee-item">layout()</span><span class="marquee-sep">&#8599;</span>
+        <span class="marquee-item">prefix()</span><span class="marquee-sep">&#8599;</span>
+      </div>
+    </div>
+  </div>
 
   <!-- ============================ PROBLEM ============================ -->
   <section class="section" id="problem">
@@ -425,6 +461,28 @@
       </div>
     </div>
   </section>
+
+  <!-- ============================ MARQUEE 2 ============================ -->
+  <div class="marquee marquee-reverse marquee-ghost" aria-hidden="true">
+    <div class="marquee-track">
+      <div class="marquee-group">
+        <span class="marquee-item">Ctrl + Click</span><span class="marquee-sep">&#8226;</span>
+        <span class="marquee-item">Go to definition</span><span class="marquee-sep">&#8226;</span>
+        <span class="marquee-item">Zero config</span><span class="marquee-sep">&#8226;</span>
+        <span class="marquee-item">Zero runtime deps</span><span class="marquee-sep">&#8226;</span>
+        <span class="marquee-item">Remix ready</span><span class="marquee-sep">&#8226;</span>
+        <span class="marquee-item">Nested routes</span><span class="marquee-sep">&#8226;</span>
+      </div>
+      <div class="marquee-group">
+        <span class="marquee-item">Ctrl + Click</span><span class="marquee-sep">&#8226;</span>
+        <span class="marquee-item">Go to definition</span><span class="marquee-sep">&#8226;</span>
+        <span class="marquee-item">Zero config</span><span class="marquee-sep">&#8226;</span>
+        <span class="marquee-item">Zero runtime deps</span><span class="marquee-sep">&#8226;</span>
+        <span class="marquee-item">Remix ready</span><span class="marquee-sep">&#8226;</span>
+        <span class="marquee-item">Nested routes</span><span class="marquee-sep">&#8226;</span>
+      </div>
+    </div>
+  </div>
 
   <!-- ============================ CTA ============================ -->
   <section class="section cta-section">
