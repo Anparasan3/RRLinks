@@ -8,6 +8,7 @@ assets/**
 CONTRIBUTING.md
 src/**
 scripts/**
+website/**
 tsconfig.json
 **/*.map
 bun.lock
