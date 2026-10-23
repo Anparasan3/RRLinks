@@ -1,6 +1,6 @@
-# https://example.com/robots.txt
+# https://anparasan3.github.io/route-links/robots.txt
 
 User-agent: *
 Allow: /
 
-Sitemap: https://example.com/sitemap.xml
+Sitemap: https://anparasan3.github.io/route-links/sitemap.xml
