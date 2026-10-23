@@ -1,24 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- SEO: replace https://example.com/ with your production origin before deploying. -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>React Router Route Links — Make your routes clickable in VS Code</title>
-<meta name="description" content="A VS Code extension that turns route file paths and API route strings in React Router v7 and Remix routes.ts configs into real, clickable links. Ctrl+Click to jump straight to the file that handles them.">
-<meta name="theme-color" content="#1e1e1e">
+
+<title>React Router Route Links — Clickable route links in VS Code</title>
+<meta name="description" content="VS Code extension that turns React Router v7 and Remix routes.ts strings into clickable links. Ctrl+Click any route or API path to open its file instantly.">
+<meta name="author" content="Anparasan T">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="theme-color" content="#0b0d12">
+<meta name="application-name" content="React Router Route Links">
+<meta name="apple-mobile-web-app-title" content="Route Links">
+
+<link rel="canonical" href="https://example.com/">
+<link rel="alternate" hreflang="en" href="https://example.com/">
+<link rel="alternate" hreflang="x-default" href="https://example.com/">
+<link rel="sitemap" type="application/xml" href="/sitemap.xml">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="assets/icon.png" type="image/png">
-<link rel="canonical" href="https://github.com/Anparasan3/route-links">
+<link rel="apple-touch-icon" href="assets/icon.png">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="React Router Route Links">
-<meta property="og:description" content="Make route file paths and API route strings clickable in VS Code. Ctrl+Click any route in your React Router v7 or Remix config to jump straight to the module that handles it.">
-<meta property="og:image" content="assets/og-banner.png">
+<meta property="og:site_name" content="React Router Route Links">
+<meta property="og:locale" content="en_US">
+<meta property="og:url" content="https://example.com/">
+<meta property="og:title" content="React Router Route Links — Clickable route links in VS Code">
+<meta property="og:description" content="Turn route file paths and API route strings in React Router v7 and Remix routes.ts configs into real, clickable links. Ctrl+Click to jump straight to the handler.">
+<meta property="og:image" content="https://example.com/assets/og-banner.png">
+<meta property="og:image:secure_url" content="https://example.com/assets/og-banner.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+<meta property="og:image:alt" content="React Router Route Links — clickable route file paths inside a VS Code routes.ts config">
+
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="React Router Route Links">
-<meta name="twitter:description" content="Make route file paths and API route strings clickable in VS Code.">
-<meta name="twitter:image" content="assets/og-banner.png">
+<meta name="twitter:title" content="React Router Route Links — Clickable route links in VS Code">
+<meta name="twitter:description" content="Turn React Router v7 and Remix route strings into clickable VS Code links. Ctrl+Click to open the handler file instantly.">
+<meta name="twitter:image" content="https://example.com/assets/og-banner.png">
+<meta name="twitter:image:alt" content="React Router Route Links — clickable route file paths inside a VS Code routes.ts config">
 
 <link rel="stylesheet" href="styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://example.com/#website",
+      "url": "https://example.com/",
+      "name": "React Router Route Links",
+      "alternateName": "RouteLinks",
+      "description": "A VS Code extension that makes route file paths and API route strings in React Router v7 and Remix configs clickable.",
+      "inLanguage": "en",
+      "publisher": { "@id": "https://example.com/#author" }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://example.com/#author",
+      "name": "Anparasan T",
+      "url": "https://github.com/Anparasan3"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://example.com/#software",
+      "name": "React Router Route Links",
+      "url": "https://example.com/",
+      "description": "Turns route file paths and API route strings in React Router v7 and Remix routes.ts configs into real, clickable VS Code links, so you can Ctrl+Click any route to jump to the module that handles it.",
+      "applicationCategory": "DeveloperApplication",
+      "applicationSubCategory": "VS Code Extension",
+      "operatingSystem": "Windows, macOS, Linux",
+      "softwareVersion": "0.0.8",
+      "isAccessibleForFree": true,
+      "inLanguage": "en",
+      "downloadUrl": "https://marketplace.visualstudio.com/items?itemName=anparasan.routelinks",
+      "installUrl": "https://marketplace.visualstudio.com/items?itemName=anparasan.routelinks",
+      "codeRepository": "https://github.com/Anparasan3/route-links",
+      "license": "https://github.com/Anparasan3/route-links/blob/main/LICENSE",
+      "author": { "@id": "https://example.com/#author" },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "Clickable route file paths inside routes.ts",
+        "Clickable API route strings anywhere in the project",
+        "Nested route resolution with route(), index(), layout() and prefix()",
+        "Works with React Router v7 and Remix",
+        "Zero runtime dependencies"
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://example.com/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Does it work with Remix?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Remix uses the same routes.ts config format, so the extension works there too."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do I have to use a specific folder layout?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Paths are resolved relative to the routes file's own directory first, then the workspace root, app/, src/app/ and src/. If the routes config lives somewhere unusual, the extension also searches the workspace for it."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What happens when a path doesn't exist?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Nothing is linked. Only strings that resolve to a real file on disk become links, so typos simply don't underline."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does it slow down my editor?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. There are no runtime dependencies and no file watchers. Your routes config is parsed once and the result is cached until the file changes on disk."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Will it work inside template literals?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Dynamic template literals like `/users/${id}` are skipped, since their value isn't known statically. Static strings are linked as usual."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is it open source?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes — MIT licensed. The full source is on GitHub, and contributions are welcome."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -29,7 +160,7 @@
 <header class="site-header" id="top">
   <div class="container header-inner">
     <a class="brand" href="#top">
-      <img src="assets/icon.png" alt="" width="28" height="28">
+      <img src="assets/icon.png" alt="" width="28" height="28" decoding="async" fetchpriority="high">
       <span class="brand-text">Route<span class="brand-accent">Links</span></span>
     </a>
 
@@ -52,7 +183,7 @@
 <main id="main">
 
   <!-- ============================ HERO ============================ -->
-  <section class="hero">
+  <section class="hero" aria-labelledby="hero-title">
     <div class="hero-glow" aria-hidden="true"></div>
     <div class="hero-orb hero-orb-a" aria-hidden="true"></div>
     <div class="hero-orb hero-orb-b" aria-hidden="true"></div>
@@ -65,7 +196,7 @@
           VS Code Marketplace &middot; v0.0.8 &middot; MIT
         </p>
 
-        <h1>
+        <h1 id="hero-title">
           Your routes are just strings.<br>
           <span class="grad">Make them links.</span>
         </h1>
@@ -191,11 +322,11 @@
   </div>
 
   <!-- ============================ PROBLEM ============================ -->
-  <section class="section" id="problem">
+  <section class="section" id="problem" aria-labelledby="problem-title">
     <div class="container">
       <div class="section-head">
         <p class="section-kicker">The problem</p>
-        <h2>VS Code can't see your routes</h2>
+        <h2 id="problem-title">VS Code can't see your routes</h2>
         <p class="section-sub">
           VS Code's TypeScript server only supports go-to-definition on real
           <code>import</code> statements. But in a React Router v7 config, route
@@ -235,11 +366,11 @@
   </section>
 
   <!-- ============================ FEATURES ============================ -->
-  <section class="section section-alt" id="features">
+  <section class="section section-alt" id="features" aria-labelledby="features-title">
     <div class="container">
       <div class="section-head">
         <p class="section-kicker">Features</p>
-        <h2>Small extension, big difference</h2>
+        <h2 id="features-title">Small extension, big difference</h2>
         <p class="section-sub">Everything it does, and nothing it doesn't.</p>
       </div>
 
@@ -296,11 +427,11 @@
   </section>
 
   <!-- ============================ HOW IT WORKS ============================ -->
-  <section class="section" id="how">
+  <section class="section" id="how" aria-labelledby="how-title">
     <div class="container">
       <div class="section-head">
         <p class="section-kicker">How it works</p>
-        <h2>Two kinds of links, one shortcut</h2>
+        <h2 id="how-title">Two kinds of links, one shortcut</h2>
         <p class="section-sub">
           Both are plain VS Code document links &mdash; hover to underline,
           Ctrl+Click (Cmd+Click on macOS) to open.
@@ -345,11 +476,11 @@
   </section>
 
   <!-- ============================ SETTINGS ============================ -->
-  <section class="section section-alt" id="settings">
+  <section class="section section-alt" id="settings" aria-labelledby="settings-title">
     <div class="container narrow">
       <div class="section-head">
         <p class="section-kicker">Settings</p>
-        <h2>Tune it to your project</h2>
+        <h2 id="settings-title">Tune it to your project</h2>
         <p class="section-sub">
           Edit under <code>Settings &rarr; Extensions &rarr; React Router Route Links</code>,
           or drop the JSON straight into <code>settings.json</code>.
@@ -394,11 +525,11 @@
   </section>
 
   <!-- ============================ INSTALL ============================ -->
-  <section class="section" id="install">
+  <section class="section" id="install" aria-labelledby="install-title">
     <div class="container narrow">
       <div class="section-head">
         <p class="section-kicker">Install</p>
-        <h2>Up and running in seconds</h2>
+        <h2 id="install-title">Up and running in seconds</h2>
       </div>
 
       <div class="install-grid">
@@ -426,11 +557,11 @@
   </section>
 
   <!-- ============================ FAQ ============================ -->
-  <section class="section section-alt" id="faq">
+  <section class="section section-alt" id="faq" aria-labelledby="faq-title">
     <div class="container narrow">
       <div class="section-head">
         <p class="section-kicker">FAQ</p>
-        <h2>Questions, answered</h2>
+        <h2 id="faq-title">Questions, answered</h2>
       </div>
 
       <div class="faq">
@@ -485,9 +616,9 @@
   </div>
 
   <!-- ============================ CTA ============================ -->
-  <section class="section cta-section">
+  <section class="section cta-section" aria-labelledby="cta-title">
     <div class="container narrow center">
-      <h2>Stop hunting for route files</h2>
+      <h2 id="cta-title">Stop hunting for route files</h2>
       <p class="section-sub">
         One install and every route in your React Router project becomes a link.
       </p>
@@ -503,7 +634,7 @@
 <footer class="site-footer">
   <div class="container footer-inner">
     <div class="footer-brand">
-      <img src="assets/icon.png" alt="" width="24" height="24">
+      <img src="assets/icon.png" alt="" width="24" height="24" loading="lazy" decoding="async">
       <span>React Router Route Links</span>
     </div>
     <nav class="footer-links" aria-label="Footer">
