@@ -132,7 +132,7 @@ jobs:
         run: vsce package ${{ steps.tag.outputs.prerelease == 'true' && '--pre-release' || '' }}
 
       - name: Cache VS Code test download
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .vscode-test
           key: ${{ runner.os }}-vscode-test
