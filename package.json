@@ -1,7 +1,7 @@
 {
   "name": "routelinks",
-  "displayName": "React Router Route Links",
-  "description": "Ctrl+Click route file paths and API route strings in React Router v7+ / Remix routes.ts configs to jump straight to the file that handles them",
+  "displayName": "React Router Route Links — Remix & routes.ts",
+  "description": "Clickable routes for React Router v7 and Remix. Ctrl+Click any routes.ts path or API route string in VS Code to jump straight to the file that handles it. Zero config, zero dependencies.",
   "version": "0.1.0",
   "publisher": "anparasan",
   "license": "MIT",
@@ -15,23 +15,51 @@
   ],
   "keywords": [
     "react-router",
+    "react router",
     "react-router-dom",
     "react-router-v7",
+    "react router v7",
     "remix",
+    "remix v2",
     "routes",
+    "routes.ts",
+    "route config",
     "routing",
     "file-based routing",
+    "clickable routes",
+    "clickable links",
+    "ctrl+click",
     "go to definition",
     "document links",
     "navigation",
+    "file navigation",
     "api routes",
-    "typescript"
+    "typescript",
+    "javascript",
+    "tsx",
+    "vscode",
+    "vscode extension",
+    "web development",
+    "frontend"
+  ],
+  "markdown": "github",
+  "badges": [
+    {
+      "url": "https://img.shields.io/visual-studio-marketplace/i/anparasan.routelinks",
+      "href": "https://marketplace.visualstudio.com/items?itemName=anparasan.routelinks",
+      "description": "Installs"
+    },
+    {
+      "url": "https://img.shields.io/visual-studio-marketplace/r/anparasan.routelinks",
+      "href": "https://marketplace.visualstudio.com/items?itemName=anparasan.routelinks&ssr=false#review-details",
+      "description": "Rating"
+    }
   ],
   "galleryBanner": {
-    "color": "#1e1e1e",
+    "color": "#0b0d12",
     "theme": "dark"
   },
-  "homepage": "https://github.com/Anparasan3/route-links#readme",
+  "homepage": "https://routelinks.anpu.dev/",
   "bugs": {
     "url": "https://github.com/Anparasan3/route-links/issues"
   },
