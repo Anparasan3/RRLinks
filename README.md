@@ -4,6 +4,9 @@ Makes route file paths **and** API route strings in React Router v7+ (and
 Remix) projects clickable in VS Code — Ctrl+Click any of them to jump
 straight to the file that handles it.
 
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/anparasan.routelinks?label=marketplace&color=007ACC)](https://marketplace.visualstudio.com/items?itemName=anparasan.routelinks)
+[![Installs](https://img.shields.io/visual-studio-marketplace/i/anparasan.routelinks)](https://marketplace.visualstudio.com/items?itemName=anparasan.routelinks)
+[![Rating](https://img.shields.io/visual-studio-marketplace/r/anparasan.routelinks)](https://marketplace.visualstudio.com/items?itemName=anparasan.routelinks)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![VS Code](https://img.shields.io/badge/VS%20Code-%5E1.85.0-007ACC.svg)
 
@@ -71,6 +74,29 @@ Customize which files and extensions are treated as route links via
 |---|---|---|
 | `reactRouterRouteLinks.fileNames` | `routes.ts`, `routes.js`, `routes.tsx`, `routes.jsx` | Which files get link treatment |
 | `reactRouterRouteLinks.extensions` | `.tsx`, `.ts`, `.jsx`, `.js`, `.mdx`, `.md` | String suffixes treated as route paths |
+
+## FAQ
+
+**Does it work with Remix?**  
+Yes. Remix uses the same `routes.ts` config format, so route and API path
+strings are clickable there too.
+
+**Does it work with React Router v6?**  
+The clickable-`routes.ts` feature targets the React Router v7 / Remix config
+format. Older file-based routing conventions are not resolved.
+
+**Do I need a specific folder layout?**  
+No. Paths resolve relative to the `routes.ts` file first, then the workspace
+root, `app/`, `src/app/`, and `src/`. If the config lives somewhere unusual,
+the extension searches the workspace for it.
+
+**Does it slow down VS Code?**  
+No. There are no file watchers or runtime dependencies. The routes config is
+parsed once and cached until it changes on disk.
+
+**Will it link dynamic template literals?**  
+No. Values like `/users/${id}` aren't statically known, so they're skipped.
+Static strings are linked normally.
 
 ## Found a bug or have a request?
 
