@@ -129,7 +129,8 @@ the extension searches the workspace for it.
 No. There are no file watchers or runtime dependencies. The routes config is
 parsed once and cached until it changes on disk. Next.js route files are
 scanned on demand and cached for 30 seconds, and the cache refreshes right away
-when you add, delete or rename a file in VS Code.
+when you add, delete or rename a file in VS Code. Files in `node_modules` and
+files over about 1 MB (bundles, minified or generated code) are skipped.
 
 **Will it link dynamic template literals?**  
 No. Values like `/users/${id}` aren't statically known, so they're skipped.

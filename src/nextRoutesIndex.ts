@@ -27,10 +27,35 @@ interface Cached<T> {
 export class NextRoutesIndex {
   private readonly rootsCache = new Map<string, Cached<string[]>>();
   private readonly routesCache = new Map<string, Cached<ResolvedRoute[]>>();
+  // Concurrent requests share one in-flight scan instead of each starting one.
+  private readonly pending = new Map<string, Promise<unknown>>();
+  private generation = 0;
 
   invalidate(): void {
+    this.generation++;
     this.rootsCache.clear();
     this.routesCache.clear();
+  }
+
+  /** Returns the cached value if fresh, else runs `scan` once (shared by
+   * concurrent callers) and caches it unless invalidated meanwhile. */
+  private cached<T>(kind: string, cache: Map<string, Cached<T>>, key: string, scan: () => Promise<T>): Promise<T> {
+    const hit = cache.get(key);
+    if (hit && Date.now() - hit.at < CACHE_TTL_MS) return Promise.resolve(hit.value);
+
+    const pendingKey = `${kind}|${key}`;
+    const inFlight = this.pending.get(pendingKey) as Promise<T> | undefined;
+    if (inFlight) return inFlight;
+
+    const generation = this.generation;
+    const promise = scan()
+      .then((value) => {
+        if (generation === this.generation) cache.set(key, { at: Date.now(), value });
+        return value;
+      })
+      .finally(() => this.pending.delete(pendingKey));
+    this.pending.set(pendingKey, promise);
+    return promise;
   }
 
   /** Routes of every Next.js app in the folder; the app containing
@@ -46,25 +71,22 @@ export class NextRoutesIndex {
     return perRoot.flat();
   }
 
-  private async findNextRoots(workspaceFolder: vscode.WorkspaceFolder): Promise<string[]> {
-    const key = workspaceFolder.uri.toString();
-    const cached = this.rootsCache.get(key);
-    if (cached && Date.now() - cached.at < CACHE_TTL_MS) return cached.value;
-
-    const configs = await vscode.workspace.findFiles(
-      new vscode.RelativePattern(workspaceFolder, NEXT_CONFIG_GLOB),
-      EXCLUDE_GLOB,
-      50
-    );
-    const roots = [...new Set(configs.map((uri) => path.dirname(uri.fsPath)))];
-    this.rootsCache.set(key, { at: Date.now(), value: roots });
-    return roots;
+  private findNextRoots(workspaceFolder: vscode.WorkspaceFolder): Promise<string[]> {
+    return this.cached("roots", this.rootsCache, workspaceFolder.uri.toString(), async () => {
+      const configs = await vscode.workspace.findFiles(
+        new vscode.RelativePattern(workspaceFolder, NEXT_CONFIG_GLOB),
+        EXCLUDE_GLOB,
+        50
+      );
+      return [...new Set(configs.map((uri) => path.dirname(uri.fsPath)))];
+    });
   }
 
-  private async routesForRoot(root: string): Promise<ResolvedRoute[]> {
-    const cached = this.routesCache.get(root);
-    if (cached && Date.now() - cached.at < CACHE_TTL_MS) return cached.value;
+  private routesForRoot(root: string): Promise<ResolvedRoute[]> {
+    return this.cached("routes", this.routesCache, root, () => this.scanRoot(root));
+  }
 
+  private async scanRoot(root: string): Promise<ResolvedRoute[]> {
     const scans: Array<[string, string, (rel: string) => string[] | null]> = [
       ["app", "**/{route,page}.{ts,tsx,js,jsx}", appRouterSegments],
       ["src/app", "**/{route,page}.{ts,tsx,js,jsx}", appRouterSegments],
@@ -85,9 +107,7 @@ export class NextRoutesIndex {
       })
     );
 
-    const entries = results.flat().sort((a, b) => compareSpecificity(a.segments, b.segments));
-    this.routesCache.set(root, { at: Date.now(), value: entries });
-    return entries;
+    return results.flat().sort((a, b) => compareSpecificity(a.segments, b.segments));
   }
 }
 

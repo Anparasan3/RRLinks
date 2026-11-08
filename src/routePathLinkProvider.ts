@@ -8,10 +8,14 @@ import {
   looksLikeRoutePath,
   looksLikeUrlPath,
   normalizeSegments,
-  segmentsMatch,
   stripQueryAndHash,
+  RouteLookup,
 } from "./routeMatching";
 import { NextRoutesIndex } from "./nextRoutesIndex";
+
+// ~1 MB. Hand-written source files are far smaller; anything bigger is
+// almost always a bundle, minified or generated file.
+const MAX_DOCUMENT_CHARS = 1_000_000;
 
 /** The match whose project folder contains `docPath` most specifically
  * (deepest folder); keeps the first such match on a tie. */
@@ -47,14 +51,23 @@ export class RoutePathLinkProvider implements vscode.DocumentLinkProvider {
     private readonly nextRoutesIndex: NextRoutesIndex
   ) {}
 
-  async provideDocumentLinks(document: vscode.TextDocument): Promise<vscode.DocumentLink[]> {
+  async provideDocumentLinks(
+    document: vscode.TextDocument,
+    token?: vscode.CancellationToken
+  ): Promise<vscode.DocumentLink[]> {
+    // Never scan dependencies or huge/generated files (bundles, minified
+    // code): they can't usefully contain route links and would cost time.
+    if (document.uri.fsPath.includes(`${path.sep}node_modules${path.sep}`)) return [];
+    const text = document.getText();
+    if (text.length > MAX_DOCUMENT_CHARS) return [];
+
     const { fileNames, extensions } = getRouteLinksConfig();
     const links: vscode.DocumentLink[] = [];
 
     if (this.isRoutesFile(document, fileNames)) {
-      links.push(...this.fileLinks(document, extensions));
+      links.push(...this.fileLinks(document, text, extensions, token));
     }
-    links.push(...(await this.routePatternLinks(document, fileNames)));
+    links.push(...(await this.routePatternLinks(document, text, fileNames, token)));
 
     return links;
   }
@@ -64,13 +77,18 @@ export class RoutePathLinkProvider implements vscode.DocumentLinkProvider {
     return fileNames.includes(base);
   }
 
-  private fileLinks(document: vscode.TextDocument, extensions: readonly string[]): vscode.DocumentLink[] {
-    const text = document.getText();
+  private fileLinks(
+    document: vscode.TextDocument,
+    text: string,
+    extensions: readonly string[],
+    token?: vscode.CancellationToken
+  ): vscode.DocumentLink[] {
     const links: vscode.DocumentLink[] = [];
     let match: RegExpExecArray | null;
 
     STRING_LITERAL_RE.lastIndex = 0;
     while ((match = STRING_LITERAL_RE.exec(text)) !== null) {
+      if (token?.isCancellationRequested) return [];
       const value = match[2];
       if (!looksLikeRoutePath(value, extensions)) continue;
 
@@ -105,7 +123,9 @@ export class RoutePathLinkProvider implements vscode.DocumentLinkProvider {
 
   private async routePatternLinks(
     document: vscode.TextDocument,
-    fileNames: readonly string[]
+    text: string,
+    fileNames: readonly string[],
+    token?: vscode.CancellationToken
   ): Promise<vscode.DocumentLink[]> {
     const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
     if (!workspaceFolder) return [];
@@ -114,22 +134,25 @@ export class RoutePathLinkProvider implements vscode.DocumentLinkProvider {
       this.routesIndex.getRouteMap(workspaceFolder, fileNames),
       this.nextRoutesIndex.getRouteMap(workspaceFolder, document.uri.fsPath),
     ]);
-    const routeMap = [...reactRouterRoutes, ...nextRoutes];
-    if (!routeMap.length) return [];
+    if (token?.isCancellationRequested) return [];
+    const lookup = new RouteLookup([...reactRouterRoutes, ...nextRoutes]);
+    if (!lookup.size) return [];
 
-    const text = document.getText();
     const links: vscode.DocumentLink[] = [];
     let match: RegExpExecArray | null;
+    let scanned = 0;
 
     STRING_LITERAL_RE.lastIndex = 0;
     while ((match = STRING_LITERAL_RE.exec(text)) !== null) {
+      // A newer request (the user kept typing) supersedes this one.
+      if (++scanned % 500 === 0 && token?.isCancellationRequested) return [];
       const value = match[2];
       if (!looksLikeUrlPath(value)) continue;
 
       const literalSegments = normalizeSegments(stripQueryAndHash(value));
       // Several apps in one workspace can define the same path; the app
       // closest to this document wins, otherwise the first match.
-      const matches = routeMap.filter((e) => segmentsMatch(e.segments, literalSegments));
+      const matches = lookup.matches(literalSegments);
       const entry = closestApp(matches, document.uri.fsPath) ?? matches[0];
       if (!entry) continue;
 
