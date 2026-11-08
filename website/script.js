@@ -321,6 +321,32 @@
     });
   });
 
+  /* ------------------------------------------------------ bubbles -- */
+
+  var bubbleLayer = document.getElementById("heroBubbles");
+
+  if (bubbleLayer && !reduceMotion) {
+    var bubbleCount = window.innerWidth < 640 ? 9 : 18;
+
+    for (var b = 0; b < bubbleCount; b++) {
+      var bubble = document.createElement("span");
+      bubble.className = "bubble";
+
+      var size = 6 + Math.random() * 30;
+      var duration = 11 + Math.random() * 14;
+      var sway = (Math.random() * 60 - 30).toFixed(1);
+
+      bubble.style.setProperty("--x", (Math.random() * 100).toFixed(2) + "%");
+      bubble.style.setProperty("--size", size.toFixed(1) + "px");
+      bubble.style.setProperty("--dur", duration.toFixed(1) + "s");
+      bubble.style.setProperty("--delay", (-Math.random() * duration).toFixed(1) + "s");
+      bubble.style.setProperty("--sway", sway + "px");
+      bubble.style.setProperty("--peak", (0.28 + Math.random() * 0.32).toFixed(2));
+
+      bubbleLayer.appendChild(bubble);
+    }
+  }
+
   /* ----------------------------------------------------- progress -- */
 
   var progress = document.getElementById("scrollProgress");
