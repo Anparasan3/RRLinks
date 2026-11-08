@@ -1,7 +1,7 @@
 {
-  "name": "React Router Route Links",
+  "name": "RouteLinks",
   "short_name": "RouteLinks",
-  "description": "Make React Router v7 and Remix route strings clickable in VS Code.",
+  "description": "Make React Router v7, Remix and Next.js route strings clickable in VS Code.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

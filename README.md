@@ -1,7 +1,7 @@
-# React Router Route Links
+# RouteLinks — React Router, Remix & Next.js
 
-Makes route file paths **and** API route strings in React Router v7+ (and
-Remix) projects clickable in VS Code — Ctrl+Click any of them to jump
+Makes route file paths **and** API route strings in React Router v7+, Remix
+and Next.js projects clickable in VS Code — Ctrl+Click any of them to jump
 straight to the file that handles it.
 
 [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/anparasan.routelinks?label=marketplace&color=007ACC)](https://marketplace.visualstudio.com/items?itemName=anparasan.routelinks)
@@ -46,9 +46,29 @@ that path is actually defined in `routes.ts` (including nested `route()`,
 `index()`, `layout()`, and `prefix()` calls) — Ctrl+Click jumps straight to
 the module that handles it.
 
+### Next.js
+
+In a Next.js project, the same API and page strings link to their files, with
+no config:
+
+```ts
+const res = await fetch('/api/analytics/summary');
+// Ctrl+Click → app/api/analytics/summary/route.ts
+```
+
+- **App Router:** `route.*` and `page.*` files under `app/` or `src/app/`.
+  Dynamic `[id]`, catch-all `[...slug]` and optional `[[...slug]]` segments,
+  route groups `(group)` and parallel slots `@slot` are all supported.
+- **Pages Router:** files under `pages/` or `src/pages/`, including
+  `index` files and `pages/api/*`.
+- Static routes win over dynamic ones, so `/api/users/me` opens
+  `users/me/route.ts` rather than `users/[id]/route.ts`.
+- Query strings and hashes are ignored (`/api/x?range=7d` still links).
+- Monorepos work: any folder with a `next.config.*` is treated as a Next.js app.
+
 ## Install
 
-Search **"React Router Route Links"** in the VS Code Extensions panel, or:
+Search **"RouteLinks"** in the VS Code Extensions panel, or:
 
 ```bash
 code --install-extension anparasan.routelinks
@@ -68,7 +88,7 @@ code --install-extension anparasan.routelinks
 ## Settings
 
 Customize which files and extensions are treated as route links via
-`Settings → Extensions → React Router Route Links`, or in `settings.json`:
+`Settings → Extensions → RouteLinks`, or in `settings.json`:
 
 | Setting | Default | Description |
 |---|---|---|
@@ -81,6 +101,10 @@ Customize which files and extensions are treated as route links via
 Yes. Remix uses the same `routes.ts` config format, so route and API path
 strings are clickable there too.
 
+**Does it work with Next.js?**  
+Yes. API and page path strings link to the matching `app/` or `pages/` file.
+A folder is treated as a Next.js app when it has a `next.config.*` file.
+
 **Does it work with React Router v6?**  
 The clickable-`routes.ts` feature targets the React Router v7 / Remix config
 format. Older file-based routing conventions are not resolved.
@@ -92,7 +116,9 @@ the extension searches the workspace for it.
 
 **Does it slow down VS Code?**  
 No. There are no file watchers or runtime dependencies. The routes config is
-parsed once and cached until it changes on disk.
+parsed once and cached until it changes on disk. Next.js route files are
+scanned on demand and cached for 30 seconds, and the cache refreshes right away
+when you add, delete or rename a file in VS Code.
 
 **Will it link dynamic template literals?**  
 No. Values like `/users/${id}` aren't statically known, so they're skipped.
@@ -105,3 +131,7 @@ Open an issue on [GitHub](https://github.com/Anparasan3/route-links/issues).
 ## License
 
 MIT © Anparasan T
+
+Next.js is a trademark of Vercel, Inc. React Router and Remix are trademarks
+of Shopify Inc. RouteLinks is an independent project and is not affiliated with
+or endorsed by either company.
