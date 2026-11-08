@@ -1,5 +1,5 @@
 import { test, expect, describe } from "bun:test";
-import { looksLikeRoutePath, looksLikeUrlPath, normalizeSegments, segmentsMatch } from "./routeMatching";
+import { looksLikeRoutePath, looksLikeUrlPath, normalizeSegments, segmentsMatch, RouteLookup } from "./routeMatching";
 
 describe("looksLikeRoutePath", () => {
   const extensions = [".tsx", ".ts", ".jsx", ".js"];
@@ -80,5 +80,28 @@ describe("segmentsMatch", () => {
 
   test("matches a trailing splat against any remainder", () => {
     expect(segmentsMatch(["files", "*"], ["files", "a", "b", "c"])).toBe(true);
+  });
+});
+
+describe("RouteLookup", () => {
+  const routes = [
+    { segments: ["api", "users", ":id"], file: "user" },
+    { segments: ["api", "users", "me"], file: "me" },
+    { segments: ["files", "*"], file: "files" },
+  ];
+  const lookup = new RouteLookup(routes);
+
+  test("finds a static route with a direct lookup", () => {
+    expect(lookup.matches(["api", "users", "me"]).map((r) => r.file)).toEqual(["me", "user"]);
+  });
+
+  test("falls back to dynamic routes", () => {
+    expect(lookup.matches(["api", "users", "42"]).map((r) => r.file)).toEqual(["user"]);
+    expect(lookup.matches(["files", "a", "b"]).map((r) => r.file)).toEqual(["files"]);
+  });
+
+  test("returns nothing for an unknown path", () => {
+    expect(lookup.matches(["nope"])).toEqual([]);
+    expect(lookup.size).toBe(3);
   });
 });

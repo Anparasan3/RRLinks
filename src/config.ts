@@ -1,8 +1,10 @@
 import * as vscode from "vscode";
+import { DEFAULT_EXCLUDED_FOLDERS } from "./excludedFolders";
 
 export interface RouteLinksConfig {
   fileNames: string[];
   extensions: string[];
+  excludeFolders: string[];
 }
 
 const DEFAULT_FILE_NAMES = ["routes.ts", "routes.js", "routes.tsx", "routes.jsx"];
@@ -13,5 +15,6 @@ export function getRouteLinksConfig(): RouteLinksConfig {
   return {
     fileNames: cfg.get("fileNames", DEFAULT_FILE_NAMES),
     extensions: cfg.get("extensions", DEFAULT_EXTENSIONS),
+    excludeFolders: cfg.get("excludeFolders", DEFAULT_EXCLUDED_FOLDERS),
   };
 }

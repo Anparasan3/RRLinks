@@ -10,7 +10,7 @@ straight to the file that handles it.
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![VS Code](https://img.shields.io/badge/VS%20Code-%5E1.85.0-007ACC.svg)
 
-![RouteLinks banner](assets/linkedin-banner.png)
+![RouteLinks: Ctrl+Click any route in React Router, Remix and Next.js](assets/banner.png)
 
 
 ## The problem
@@ -46,14 +46,23 @@ that path is actually defined in `routes.ts` (including nested `route()`,
 `index()`, `layout()`, and `prefix()` calls) — Ctrl+Click jumps straight to
 the module that handles it.
 
+That includes navigation, not just API calls:
+
+```tsx
+<Link to="/about">About</Link>       // → routes/about.tsx
+navigate("/users/42");               // → routes/user.tsx
+return redirect("/about");           // → routes/about.tsx
+```
+
 ### Next.js
 
 In a Next.js project, the same API and page strings link to their files, with
 no config:
 
-```ts
-const res = await fetch('/api/analytics/summary');
-// Ctrl+Click → app/api/analytics/summary/route.ts
+```tsx
+const res = await fetch('/api/analytics/summary'); // → app/api/analytics/summary/route.ts
+<Link href="/blog/hello-world">Post</Link>          // → app/blog/[slug]/page.tsx
+router.push('/dashboard');                          // → app/dashboard/page.tsx
 ```
 
 - **App Router:** `route.*` and `page.*` files under `app/` or `src/app/`.
@@ -65,6 +74,8 @@ const res = await fetch('/api/analytics/summary');
   `users/me/route.ts` rather than `users/[id]/route.ts`.
 - Query strings and hashes are ignored (`/api/x?range=7d` still links).
 - Monorepos work: any folder with a `next.config.*` is treated as a Next.js app.
+  When several apps define the same path, the app containing the current file
+  wins.
 
 ## Install
 
@@ -94,6 +105,7 @@ Customize which files and extensions are treated as route links via
 |---|---|---|
 | `reactRouterRouteLinks.fileNames` | `routes.ts`, `routes.js`, `routes.tsx`, `routes.jsx` | Which files get link treatment |
 | `reactRouterRouteLinks.extensions` | `.tsx`, `.ts`, `.jsx`, `.js`, `.mdx`, `.md` | String suffixes treated as route paths |
+| `reactRouterRouteLinks.excludeFolders` | `node_modules`, `dist`, `build`, `out`, `.next`, `.react-router`, `.turbo`, `.vercel`, `.output`, `.cache`, `coverage`, `.git` | Folders that are skipped: no links inside them, never searched for routes |
 
 ## FAQ
 
@@ -118,7 +130,9 @@ the extension searches the workspace for it.
 No. There are no file watchers or runtime dependencies. The routes config is
 parsed once and cached until it changes on disk. Next.js route files are
 scanned on demand and cached for 30 seconds, and the cache refreshes right away
-when you add, delete or rename a file in VS Code.
+when you add, delete or rename a file in VS Code. Dependency, build and
+generated folders (`node_modules`, `dist`, `build`, `.next`, `.react-router`
+and more; see `excludeFolders`) and files over about 1 MB are skipped.
 
 **Will it link dynamic template literals?**  
 No. Values like `/users/${id}` aren't statically known, so they're skipped.

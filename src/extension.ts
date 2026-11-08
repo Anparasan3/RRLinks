@@ -15,15 +15,26 @@ export function activate(context: vscode.ExtensionContext): void {
   const nextRoutesIndex = new NextRoutesIndex();
   const provider = new RoutePathLinkProvider(routesIndex, nextRoutesIndex);
 
-  // Next.js routes come from the file system, so a route file added,
-  // removed or renamed inside VS Code should show up right away.
-  const invalidateNext = () => nextRoutesIndex.invalidate();
+  // Route files are found on disk and cached, so a file added, removed or
+  // renamed inside VS Code (a new routes.ts, a new Next.js route) should
+  // show up right away rather than after the cache expires.
+  const invalidate = () => {
+    routesIndex.invalidate();
+    nextRoutesIndex.invalidate();
+  };
 
   context.subscriptions.push(
     vscode.languages.registerDocumentLinkProvider(selector, provider),
-    vscode.workspace.onDidCreateFiles(invalidateNext),
-    vscode.workspace.onDidDeleteFiles(invalidateNext),
-    vscode.workspace.onDidRenameFiles(invalidateNext)
+    vscode.workspace.onDidCreateFiles(invalidate),
+    vscode.workspace.onDidDeleteFiles(invalidate),
+    vscode.workspace.onDidRenameFiles(invalidate),
+    // Multi-root workspaces: drop cached data for removed folders and look
+    // up added ones fresh.
+    vscode.workspace.onDidChangeWorkspaceFolders(invalidate),
+    // Changed file names or excluded folders change what the scans find.
+    vscode.workspace.onDidChangeConfiguration((e) => {
+      if (e.affectsConfiguration("reactRouterRouteLinks")) invalidate();
+    })
   );
 }
 

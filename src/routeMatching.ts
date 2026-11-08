@@ -32,6 +32,41 @@ export function normalizeSegments(value: string): string[] {
   return value.replace(/^\/+|\/+$/g, "").split("/").filter(Boolean);
 }
 
+/**
+ * Fast route lookup: static routes (no ":param" / "*") are found with one
+ * map lookup; only dynamic routes are checked one by one. Results list
+ * static matches first, then dynamic ones in their original order.
+ */
+export class RouteLookup<T extends { segments: readonly string[] }> {
+  private readonly exact = new Map<string, T[]>();
+  private readonly dynamic: T[] = [];
+
+  constructor(routes: readonly T[]) {
+    for (const route of routes) {
+      if (route.segments.some((s) => s === "*" || s.startsWith(":"))) {
+        this.dynamic.push(route);
+      } else {
+        const key = route.segments.join("/");
+        const bucket = this.exact.get(key);
+        if (bucket) bucket.push(route);
+        else this.exact.set(key, [route]);
+      }
+    }
+  }
+
+  get size(): number {
+    return this.exact.size + this.dynamic.length;
+  }
+
+  matches(literalSegments: readonly string[]): T[] {
+    const found = [...(this.exact.get(literalSegments.join("/")) ?? [])];
+    for (const route of this.dynamic) {
+      if (segmentsMatch(route.segments, literalSegments)) found.push(route);
+    }
+    return found;
+  }
+}
+
 export function segmentsMatch(patternSegments: readonly string[], literalSegments: readonly string[]): boolean {
   const lastIsSplat = patternSegments[patternSegments.length - 1] === "*";
   if (lastIsSplat) {
