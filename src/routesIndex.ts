@@ -3,11 +3,14 @@ import * as fs from "fs";
 import * as path from "path";
 import { parseRoutesConfig } from "./routeConfigParser";
 import { normalizeSegments } from "./routeMatching";
-import { resolveExistingFile } from "./fileResolution";
+import { resolveExistingFile, findProjectRoot } from "./fileResolution";
 
 export interface ResolvedRoute {
   segments: string[];
   file: string;
+  /** Project folder the route belongs to; a document inside it prefers
+   * this route over an identical path from another app in the workspace. */
+  root?: string;
 }
 
 interface RouteMapCacheEntry {
@@ -55,11 +58,12 @@ export class RoutesIndex {
       return [];
     }
 
+    const root = findProjectRoot(routesFsPath, workspaceFolder.uri.fsPath);
     const entries: ResolvedRoute[] = [];
     for (const { pattern, file } of parseRoutesConfig(source)) {
       const target = this.resolveRouteFileTarget(routesFsPath, workspaceFolder, file);
       if (!target) continue;
-      entries.push({ segments: normalizeSegments(pattern), file: target });
+      entries.push({ segments: normalizeSegments(pattern), file: target, root });
     }
 
     this.routeMapCache.set(key, { routesFsPath, mtimeMs, entries });

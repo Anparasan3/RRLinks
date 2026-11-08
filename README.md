@@ -46,14 +46,23 @@ that path is actually defined in `routes.ts` (including nested `route()`,
 `index()`, `layout()`, and `prefix()` calls) — Ctrl+Click jumps straight to
 the module that handles it.
 
+That includes navigation, not just API calls:
+
+```tsx
+<Link to="/about">About</Link>       // → routes/about.tsx
+navigate("/users/42");               // → routes/user.tsx
+return redirect("/about");           // → routes/about.tsx
+```
+
 ### Next.js
 
 In a Next.js project, the same API and page strings link to their files, with
 no config:
 
-```ts
-const res = await fetch('/api/analytics/summary');
-// Ctrl+Click → app/api/analytics/summary/route.ts
+```tsx
+const res = await fetch('/api/analytics/summary'); // → app/api/analytics/summary/route.ts
+<Link href="/blog/hello-world">Post</Link>          // → app/blog/[slug]/page.tsx
+router.push('/dashboard');                          // → app/dashboard/page.tsx
 ```
 
 - **App Router:** `route.*` and `page.*` files under `app/` or `src/app/`.
@@ -65,6 +74,8 @@ const res = await fetch('/api/analytics/summary');
   `users/me/route.ts` rather than `users/[id]/route.ts`.
 - Query strings and hashes are ignored (`/api/x?range=7d` still links).
 - Monorepos work: any folder with a `next.config.*` is treated as a Next.js app.
+  When several apps define the same path, the app containing the current file
+  wins.
 
 ## Install
 

@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import { RoutesIndex } from "./routesIndex";
+import { RoutesIndex, type ResolvedRoute } from "./routesIndex";
 import { getRouteLinksConfig } from "./config";
-import { resolveExistingFile } from "./fileResolution";
+import { resolveExistingFile, isInside } from "./fileResolution";
 import {
   STRING_LITERAL_RE,
   looksLikeRoutePath,
@@ -12,6 +12,17 @@ import {
   stripQueryAndHash,
 } from "./routeMatching";
 import { NextRoutesIndex } from "./nextRoutesIndex";
+
+/** The match whose project folder contains `docPath` most specifically
+ * (deepest folder); keeps the first such match on a tie. */
+function closestApp(matches: readonly ResolvedRoute[], docPath: string): ResolvedRoute | undefined {
+  let best: ResolvedRoute | undefined;
+  for (const m of matches) {
+    if (!m.root || !isInside(docPath, m.root)) continue;
+    if (!best || m.root.length > best.root!.length) best = m;
+  }
+  return best;
+}
 
 /**
  * Two link kinds, both Ctrl+Click:
@@ -116,7 +127,10 @@ export class RoutePathLinkProvider implements vscode.DocumentLinkProvider {
       if (!looksLikeUrlPath(value)) continue;
 
       const literalSegments = normalizeSegments(stripQueryAndHash(value));
-      const entry = routeMap.find((e) => segmentsMatch(e.segments, literalSegments));
+      // Several apps in one workspace can define the same path; the app
+      // closest to this document wins, otherwise the first match.
+      const matches = routeMap.filter((e) => segmentsMatch(e.segments, literalSegments));
+      const entry = closestApp(matches, document.uri.fsPath) ?? matches[0];
       if (!entry) continue;
 
       const start = document.positionAt(match.index + 1);

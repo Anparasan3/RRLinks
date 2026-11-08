@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import type { ResolvedRoute } from "./routesIndex";
 import { appRouterSegments, pagesRouterSegments, compareSpecificity } from "./nextjsRoutes";
+import { isInside } from "./fileResolution";
 
 const NEXT_CONFIG_GLOB = "**/next.config.{js,mjs,cjs,ts,mts}";
 const EXCLUDE_GLOB = "**/node_modules/**";
@@ -78,7 +79,7 @@ export class NextRoutesIndex {
         const entries: ResolvedRoute[] = [];
         for (const uri of files) {
           const segments = toSegments(path.relative(base, uri.fsPath));
-          if (segments) entries.push({ segments, file: uri.fsPath });
+          if (segments) entries.push({ segments, file: uri.fsPath, root });
         }
         return entries;
       })
@@ -90,7 +91,3 @@ export class NextRoutesIndex {
   }
 }
 
-function isInside(file: string, dir: string): boolean {
-  const rel = path.relative(dir, file);
-  return !!rel && !rel.startsWith("..") && !path.isAbsolute(rel);
-}
