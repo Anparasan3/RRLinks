@@ -1,7 +1,7 @@
 {
   "name": "routelinks",
-  "displayName": "React Router Route Links — Remix & routes.ts",
-  "description": "Clickable routes for React Router v7 and Remix. Ctrl+Click any routes.ts path or API route string in VS Code to jump straight to the file that handles it. Zero config, zero dependencies.",
+  "displayName": "RouteLinks — React Router, Remix & Next.js",
+  "description": "Clickable routes for React Router v7, Remix and Next.js. Ctrl+Click any routes.ts path or API route string in VS Code to jump straight to the file that handles it. Zero config, zero dependencies.",
   "version": "0.1.1",
   "publisher": "anparasan",
   "license": "MIT",
@@ -21,6 +21,12 @@
     "react router v7",
     "remix",
     "remix v2",
+    "nextjs",
+    "next.js",
+    "next",
+    "app router",
+    "pages router",
+    "route handlers",
     "routes",
     "routes.ts",
     "route config",
@@ -87,7 +93,7 @@
   ],
   "contributes": {
     "configuration": {
-      "title": "React Router Route Links",
+      "title": "RouteLinks",
       "properties": {
         "reactRouterRouteLinks.fileNames": {
           "type": "array",

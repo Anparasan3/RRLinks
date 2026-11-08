@@ -1,5 +1,5 @@
 /* ==========================================================================
-   React Router Route Links — landing page interactions
+   RouteLinks — landing page interactions
    ========================================================================== */
 (function () {
   "use strict";
