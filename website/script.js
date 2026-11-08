@@ -208,10 +208,43 @@
     }, 900);
   }
 
+  /* ------------------------------------------------------- analytics -- */
+
+  // Pushes a custom event to the Google Tag Manager data layer (see <head>).
+  // GTM forwards it to GA4 via a "Custom Event" trigger; if GTM is blocked
+  // or missing, the push is harmless and the page works the same.
+  function track(name, params) {
+    var data = { event: name };
+    for (var key in params) data[key] = params[key];
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push(data);
+  }
+
+  // Which part of the page a click came from: header, hero, install, footer...
+  function placeOf(el) {
+    if (el.closest(".site-header")) return "header";
+    if (el.closest(".site-footer")) return "footer";
+    var section = el.closest("section[id], section[class]");
+    if (!section) return "page";
+    return section.id || section.className.split(" ").pop();
+  }
+
+  document.addEventListener("click", function (event) {
+    var link = event.target.closest && event.target.closest("a[href]");
+    if (!link) return;
+    var href = link.getAttribute("href");
+    if (href.indexOf("marketplace.visualstudio.com") !== -1) {
+      track("install_click", { link_location: placeOf(link) });
+    } else if (href.indexOf("github.com") !== -1) {
+      track("github_click", { link_location: placeOf(link), link_url: href });
+    }
+  });
+
   /* ------------------------------------------------------------ copy -- */
 
   document.querySelectorAll(".copy-btn").forEach(function (btn) {
     btn.addEventListener("click", function () {
+      track("copy_click", { copy_target: btn.getAttribute("data-copy-target") });
       var target = document.getElementById(btn.getAttribute("data-copy-target"));
       if (!target) return;
 
