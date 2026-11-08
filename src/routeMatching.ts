@@ -22,6 +22,12 @@ export function looksLikeUrlPath(value: string): boolean {
   return true;
 }
 
+/** "/api/x?range=7d#top" -> "/api/x". Only for string literals, not route
+ * patterns, where "?" marks an optional segment (":id?"). */
+export function stripQueryAndHash(value: string): string {
+  return value.replace(/[?#].*$/, "");
+}
+
 export function normalizeSegments(value: string): string[] {
   return value.replace(/^\/+|\/+$/g, "").split("/").filter(Boolean);
 }

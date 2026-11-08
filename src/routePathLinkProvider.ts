@@ -9,7 +9,9 @@ import {
   looksLikeUrlPath,
   normalizeSegments,
   segmentsMatch,
+  stripQueryAndHash,
 } from "./routeMatching";
+import { NextRoutesIndex } from "./nextRoutesIndex";
 
 /**
  * Two link kinds, both Ctrl+Click:
@@ -21,13 +23,18 @@ import {
  *    literal that looks like a URL path, e.g. "/api/someroute/:someId/some",
  *    becomes a link to the module that actually handles that route, found by
  *    parsing the project's routes.ts config via the injected RoutesIndex
- *    (see ./routeConfigParser.ts, ./routeMatching.ts, and ./routesIndex.ts).
+ *    (see ./routeConfigParser.ts, ./routeMatching.ts, and ./routesIndex.ts),
+ *    or, in a Next.js project, from its app/ and pages/ files via
+ *    NextRoutesIndex (see ./nextjsRoutes.ts and ./nextRoutesIndex.ts).
  *
  * Only emits links when the target file actually exists, so typos/no-match
  * simply don't underline.
  */
 export class RoutePathLinkProvider implements vscode.DocumentLinkProvider {
-  constructor(private readonly routesIndex: RoutesIndex) {}
+  constructor(
+    private readonly routesIndex: RoutesIndex,
+    private readonly nextRoutesIndex: NextRoutesIndex
+  ) {}
 
   async provideDocumentLinks(document: vscode.TextDocument): Promise<vscode.DocumentLink[]> {
     const { fileNames, extensions } = getRouteLinksConfig();
@@ -92,7 +99,11 @@ export class RoutePathLinkProvider implements vscode.DocumentLinkProvider {
     const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
     if (!workspaceFolder) return [];
 
-    const routeMap = await this.routesIndex.getRouteMap(workspaceFolder, fileNames);
+    const [reactRouterRoutes, nextRoutes] = await Promise.all([
+      this.routesIndex.getRouteMap(workspaceFolder, fileNames),
+      this.nextRoutesIndex.getRouteMap(workspaceFolder, document.uri.fsPath),
+    ]);
+    const routeMap = [...reactRouterRoutes, ...nextRoutes];
     if (!routeMap.length) return [];
 
     const text = document.getText();
@@ -104,7 +115,7 @@ export class RoutePathLinkProvider implements vscode.DocumentLinkProvider {
       const value = match[2];
       if (!looksLikeUrlPath(value)) continue;
 
-      const literalSegments = normalizeSegments(value);
+      const literalSegments = normalizeSegments(stripQueryAndHash(value));
       const entry = routeMap.find((e) => segmentsMatch(e.segments, literalSegments));
       if (!entry) continue;
 

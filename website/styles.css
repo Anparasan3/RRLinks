@@ -1,5 +1,5 @@
 /* ==========================================================================
-   React Router Route Links — landing page
+   RouteLinks — landing page
    ========================================================================== */
 
 :root {
@@ -903,6 +903,7 @@ kbd {
 .footer-links a { color: var(--text-dim); font-size: .9rem; }
 .footer-links a:hover { color: var(--text); }
 .footer-copy { color: var(--text-faint); font-size: .86rem; margin: 0; }
+.footer-legal { flex-basis: 100%; font-size: .78rem; opacity: .8; }
 
 /* ------------------------------------------------------- reveal anim -- */
 
