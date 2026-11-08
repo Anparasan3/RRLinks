@@ -10,7 +10,7 @@ straight to the file that handles it.
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![VS Code](https://img.shields.io/badge/VS%20Code-%5E1.85.0-007ACC.svg)
 
-![RouteLinks banner](assets/linkedin-banner.png)
+![RouteLinks: Ctrl+Click any route in React Router, Remix and Next.js](assets/banner.png)
 
 
 ## The problem
