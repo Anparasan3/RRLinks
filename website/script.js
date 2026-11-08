@@ -146,6 +146,7 @@
     // Demo tabs.
     var tabs = demo.querySelectorAll(".tab");
     var files = demo.querySelectorAll(".editor-file");
+    var leaveTimers = new WeakMap();
 
     function selectFile(name) {
       tabs.forEach(function (tab) {
@@ -155,8 +156,32 @@
       });
       files.forEach(function (file) {
         var on = file.getAttribute("data-file") === name;
-        file.hidden = !on;
-        file.classList.toggle("is-active", on);
+        var timer = leaveTimers.get(file);
+        if (timer) {
+          window.clearTimeout(timer);
+          leaveTimers.delete(file);
+        }
+
+        if (on) {
+          file.hidden = false;
+          file.classList.remove("is-leaving", "is-entering");
+          void file.offsetWidth;
+          file.classList.add("is-entering");
+          file.classList.add("is-active");
+          file.setAttribute("aria-hidden", "false");
+        } else if (!file.hidden) {
+          file.classList.remove("is-active", "is-entering");
+          file.classList.add("is-leaving");
+          file.setAttribute("aria-hidden", "true");
+          leaveTimers.set(
+            file,
+            window.setTimeout(function () {
+              if (!file.classList.contains("is-leaving")) return;
+              file.hidden = true;
+              file.classList.remove("is-leaving");
+            }, 300)
+          );
+        }
       });
       hidePeek();
     }
@@ -326,13 +351,13 @@
   var bubbleLayer = document.getElementById("heroBubbles");
 
   if (bubbleLayer && !reduceMotion) {
-    var bubbleCount = window.innerWidth < 640 ? 9 : 18;
+    var bubbleCount = window.innerWidth < 640 ? 10 : 20;
 
     for (var b = 0; b < bubbleCount; b++) {
       var bubble = document.createElement("span");
       bubble.className = "bubble";
 
-      var size = 6 + Math.random() * 30;
+      var size = 5 + Math.random() * 34;
       var duration = 11 + Math.random() * 14;
       var sway = (Math.random() * 60 - 30).toFixed(1);
 
@@ -353,6 +378,62 @@
   var header = document.querySelector(".site-header");
   var ticking = false;
 
+  var nav = document.querySelector(".site-nav");
+  var navIndicator = nav && nav.querySelector(".nav-indicator");
+  var navLinks = nav ? Array.prototype.slice.call(nav.querySelectorAll('a[href^="#"]')) : [];
+  var navTargets = navLinks.map(function (link) {
+    return document.getElementById(link.getAttribute("href").slice(1));
+  });
+  var navActive = -1;
+
+  function updateNavIndicator() {
+    if (!nav || !navIndicator) return;
+
+    if (window.innerWidth <= 1000) {
+      navIndicator.classList.remove("is-visible");
+      return;
+    }
+
+    var scrollPos = window.scrollY + 130;
+    var index = -1;
+
+    navTargets.forEach(function (target, i) {
+      if (!target) return;
+      var top = target.getBoundingClientRect().top + window.scrollY;
+      if (top <= scrollPos) index = i;
+    });
+
+    if (index === -1) {
+      navIndicator.classList.remove("is-visible");
+      navLinks.forEach(function (link) {
+        link.classList.remove("is-active");
+        link.removeAttribute("aria-current");
+      });
+      navActive = -1;
+      return;
+    }
+
+    if (index !== navActive) {
+      navLinks.forEach(function (link, i) {
+        var on = i === index;
+        link.classList.toggle("is-active", on);
+        if (on) {
+          link.setAttribute("aria-current", "location");
+        } else {
+          link.removeAttribute("aria-current");
+        }
+      });
+      navActive = index;
+    }
+
+    var link = navLinks[index];
+    var width = link.offsetWidth + 18;
+    var x = link.offsetLeft - 9;
+    navIndicator.style.width = width + "px";
+    navIndicator.style.transform = "translate3d(" + x + "px, -50%, 0)";
+    navIndicator.classList.add("is-visible");
+  }
+
   function onScroll() {
     var y = window.scrollY;
     var max = document.documentElement.scrollHeight - window.innerHeight;
@@ -365,6 +446,8 @@
     if (header) {
       header.classList.toggle("is-scrolled", y > 8);
     }
+
+    updateNavIndicator();
 
     ticking = false;
   }
@@ -379,6 +462,10 @@
     },
     { passive: true }
   );
+  window.addEventListener("resize", updateNavIndicator);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(updateNavIndicator);
+  }
   onScroll();
 
   /* --------------------------------------------------- interactions -- */
