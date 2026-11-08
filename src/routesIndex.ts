@@ -4,6 +4,7 @@ import * as path from "path";
 import { parseRoutesConfig } from "./routeConfigParser";
 import { normalizeSegments } from "./routeMatching";
 import { resolveExistingFile, findProjectRoot } from "./fileResolution";
+import { excludeGlob } from "./excludedFolders";
 
 export interface ResolvedRoute {
   segments: string[];
@@ -41,8 +42,12 @@ export class RoutesIndex {
   // re-parsing on a changed-mtime read is cheap and this file is small.
   private readonly routeMapCache = new Map<string, RouteMapCacheEntry>();
 
-  async getRouteMap(workspaceFolder: vscode.WorkspaceFolder, fileNames: readonly string[]): Promise<ResolvedRoute[]> {
-    const routesFsPath = await this.locateRoutesFile(workspaceFolder, fileNames);
+  async getRouteMap(
+    workspaceFolder: vscode.WorkspaceFolder,
+    fileNames: readonly string[],
+    excludeFolders: readonly string[]
+  ): Promise<ResolvedRoute[]> {
+    const routesFsPath = await this.locateRoutesFile(workspaceFolder, fileNames, excludeFolders);
     if (!routesFsPath) return [];
 
     let mtimeMs: number;
@@ -83,8 +88,12 @@ export class RoutesIndex {
     this.routesFileLocationCache.clear();
   }
 
-  private locateRoutesFile(workspaceFolder: vscode.WorkspaceFolder, fileNames: readonly string[]): Promise<string | null> {
-    const key = `${workspaceFolder.uri.toString()}|${fileNames.join(",")}`;
+  private locateRoutesFile(
+    workspaceFolder: vscode.WorkspaceFolder,
+    fileNames: readonly string[],
+    excludeFolders: readonly string[]
+  ): Promise<string | null> {
+    const key = `${workspaceFolder.uri.toString()}|${fileNames.join(",")}|${excludeFolders.join(",")}`;
     const cached = this.routesFileLocationCache.get(key);
     if (cached) {
       const fresh = cached.path ? fs.existsSync(cached.path) : Date.now() - cached.at < LOCATE_RETRY_MS;
@@ -95,7 +104,7 @@ export class RoutesIndex {
     let pending = this.pendingLocate.get(key);
     if (!pending) {
       const generation = this.generation;
-      pending = this.searchRoutesFile(workspaceFolder, fileNames)
+      pending = this.searchRoutesFile(workspaceFolder, fileNames, excludeFolders)
         .then((found) => {
           if (generation === this.generation) this.routesFileLocationCache.set(key, { path: found, at: Date.now() });
           return found;
@@ -108,7 +117,8 @@ export class RoutesIndex {
 
   private async searchRoutesFile(
     workspaceFolder: vscode.WorkspaceFolder,
-    fileNames: readonly string[]
+    fileNames: readonly string[],
+    excludeFolders: readonly string[]
   ): Promise<string | null> {
     for (const dir of ["app", "src/app", "src", "."]) {
       for (const name of fileNames) {
@@ -119,7 +129,7 @@ export class RoutesIndex {
 
     // Fallback for unconventional layouts: search the whole workspace folder.
     const pattern = new vscode.RelativePattern(workspaceFolder, `**/{${fileNames.join(",")}}`);
-    const found = await vscode.workspace.findFiles(pattern, "**/node_modules/**", 1);
+    const found = await vscode.workspace.findFiles(pattern, excludeGlob(excludeFolders), 1);
     return found[0] ? found[0].fsPath : null;
   }
 

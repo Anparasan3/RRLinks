@@ -3,9 +3,9 @@ import * as path from "path";
 import type { ResolvedRoute } from "./routesIndex";
 import { appRouterSegments, pagesRouterSegments, compareSpecificity } from "./nextjsRoutes";
 import { isInside } from "./fileResolution";
+import { excludeGlob } from "./excludedFolders";
 
 const NEXT_CONFIG_GLOB = "**/next.config.{js,mjs,cjs,ts,mts}";
-const EXCLUDE_GLOB = "**/node_modules/**";
 // ponytail: no file watcher. Results are reused for a short window and
 // dropped early when files are created/deleted/renamed inside VS Code
 // (see extension.ts); anything changed outside VS Code is picked up once
@@ -60,33 +60,39 @@ export class NextRoutesIndex {
 
   /** Routes of every Next.js app in the folder; the app containing
    * `documentFsPath` comes first so its routes win on a tie. */
-  async getRouteMap(workspaceFolder: vscode.WorkspaceFolder, documentFsPath: string): Promise<ResolvedRoute[]> {
-    const roots = await this.findNextRoots(workspaceFolder);
+  async getRouteMap(
+    workspaceFolder: vscode.WorkspaceFolder,
+    documentFsPath: string,
+    excludeFolders: readonly string[]
+  ): Promise<ResolvedRoute[]> {
+    // The extension clears this cache when the setting changes (extension.ts).
+    const exclude = excludeGlob(excludeFolders);
+    const roots = await this.findNextRoots(workspaceFolder, exclude);
     if (!roots.length) return [];
 
     const ordered = [...roots].sort(
       (a, b) => Number(isInside(documentFsPath, b)) - Number(isInside(documentFsPath, a)) || b.length - a.length
     );
-    const perRoot = await Promise.all(ordered.map((root) => this.routesForRoot(root)));
+    const perRoot = await Promise.all(ordered.map((root) => this.routesForRoot(root, exclude)));
     return perRoot.flat();
   }
 
-  private findNextRoots(workspaceFolder: vscode.WorkspaceFolder): Promise<string[]> {
+  private findNextRoots(workspaceFolder: vscode.WorkspaceFolder, exclude: string): Promise<string[]> {
     return this.cached("roots", this.rootsCache, workspaceFolder.uri.toString(), async () => {
       const configs = await vscode.workspace.findFiles(
         new vscode.RelativePattern(workspaceFolder, NEXT_CONFIG_GLOB),
-        EXCLUDE_GLOB,
+        exclude,
         50
       );
       return [...new Set(configs.map((uri) => path.dirname(uri.fsPath)))];
     });
   }
 
-  private routesForRoot(root: string): Promise<ResolvedRoute[]> {
-    return this.cached("routes", this.routesCache, root, () => this.scanRoot(root));
+  private routesForRoot(root: string, exclude: string): Promise<ResolvedRoute[]> {
+    return this.cached("routes", this.routesCache, root, () => this.scanRoot(root, exclude));
   }
 
-  private async scanRoot(root: string): Promise<ResolvedRoute[]> {
+  private async scanRoot(root: string, exclude: string): Promise<ResolvedRoute[]> {
     const scans: Array<[string, string, (rel: string) => string[] | null]> = [
       ["app", "**/{route,page}.{ts,tsx,js,jsx}", appRouterSegments],
       ["src/app", "**/{route,page}.{ts,tsx,js,jsx}", appRouterSegments],
@@ -97,7 +103,7 @@ export class NextRoutesIndex {
     const results = await Promise.all(
       scans.map(async ([dir, glob, toSegments]) => {
         const base = path.join(root, dir);
-        const files = await vscode.workspace.findFiles(new vscode.RelativePattern(base, glob), EXCLUDE_GLOB);
+        const files = await vscode.workspace.findFiles(new vscode.RelativePattern(base, glob), exclude);
         const entries: ResolvedRoute[] = [];
         for (const uri of files) {
           const segments = toSegments(path.relative(base, uri.fsPath));

@@ -110,6 +110,14 @@
           },
           "default": [".tsx", ".ts", ".jsx", ".js", ".mdx", ".md"],
           "description": "String literals ending with these extensions are treated as route file paths."
+        },
+        "reactRouterRouteLinks.excludeFolders": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": ["node_modules", "dist", "build", "out", ".next", ".react-router", ".turbo", ".vercel", ".output", ".cache", "coverage", ".git"],
+          "description": "Folder names that are skipped: files inside them get no links and are never treated as routes (dependencies, build output, generated code)."
         }
       }
     }

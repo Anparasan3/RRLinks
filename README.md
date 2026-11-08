@@ -105,6 +105,7 @@ Customize which files and extensions are treated as route links via
 |---|---|---|
 | `reactRouterRouteLinks.fileNames` | `routes.ts`, `routes.js`, `routes.tsx`, `routes.jsx` | Which files get link treatment |
 | `reactRouterRouteLinks.extensions` | `.tsx`, `.ts`, `.jsx`, `.js`, `.mdx`, `.md` | String suffixes treated as route paths |
+| `reactRouterRouteLinks.excludeFolders` | `node_modules`, `dist`, `build`, `out`, `.next`, `.react-router`, `.turbo`, `.vercel`, `.output`, `.cache`, `coverage`, `.git` | Folders that are skipped: no links inside them, never searched for routes |
 
 ## FAQ
 
@@ -129,8 +130,9 @@ the extension searches the workspace for it.
 No. There are no file watchers or runtime dependencies. The routes config is
 parsed once and cached until it changes on disk. Next.js route files are
 scanned on demand and cached for 30 seconds, and the cache refreshes right away
-when you add, delete or rename a file in VS Code. Files in `node_modules` and
-files over about 1 MB (bundles, minified or generated code) are skipped.
+when you add, delete or rename a file in VS Code. Dependency, build and
+generated folders (`node_modules`, `dist`, `build`, `.next`, `.react-router`
+and more; see `excludeFolders`) and files over about 1 MB are skipped.
 
 **Will it link dynamic template literals?**  
 No. Values like `/users/${id}` aren't statically known, so they're skipped.

@@ -30,7 +30,11 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.workspace.onDidRenameFiles(invalidate),
     // Multi-root workspaces: drop cached data for removed folders and look
     // up added ones fresh.
-    vscode.workspace.onDidChangeWorkspaceFolders(invalidate)
+    vscode.workspace.onDidChangeWorkspaceFolders(invalidate),
+    // Changed file names or excluded folders change what the scans find.
+    vscode.workspace.onDidChangeConfiguration((e) => {
+      if (e.affectsConfiguration("reactRouterRouteLinks")) invalidate();
+    })
   );
 }
 

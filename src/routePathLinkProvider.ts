@@ -12,6 +12,7 @@ import {
   RouteLookup,
 } from "./routeMatching";
 import { NextRoutesIndex } from "./nextRoutesIndex";
+import { isInExcludedFolder } from "./excludedFolders";
 
 // ~1 MB. Hand-written source files are far smaller; anything bigger is
 // almost always a bundle, minified or generated file.
@@ -55,19 +56,22 @@ export class RoutePathLinkProvider implements vscode.DocumentLinkProvider {
     document: vscode.TextDocument,
     token?: vscode.CancellationToken
   ): Promise<vscode.DocumentLink[]> {
-    // Never scan dependencies or huge/generated files (bundles, minified
-    // code): they can't usefully contain route links and would cost time.
-    if (document.uri.fsPath.includes(`${path.sep}node_modules${path.sep}`)) return [];
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
+    if (!workspaceFolder) return [];
+    const { fileNames, extensions, excludeFolders } = getRouteLinksConfig();
+
+    // Never scan dependencies, build output, generated code or huge files
+    // (bundles, minified code): they hold no hand-written route links.
+    if (isInExcludedFolder(document.uri.fsPath, workspaceFolder.uri.fsPath, excludeFolders)) return [];
     const text = document.getText();
     if (text.length > MAX_DOCUMENT_CHARS) return [];
 
-    const { fileNames, extensions } = getRouteLinksConfig();
     const links: vscode.DocumentLink[] = [];
 
     if (this.isRoutesFile(document, fileNames)) {
       links.push(...this.fileLinks(document, text, extensions, token));
     }
-    links.push(...(await this.routePatternLinks(document, text, fileNames, token)));
+    links.push(...(await this.routePatternLinks(document, workspaceFolder, text, fileNames, excludeFolders, token)));
 
     return links;
   }
@@ -123,16 +127,15 @@ export class RoutePathLinkProvider implements vscode.DocumentLinkProvider {
 
   private async routePatternLinks(
     document: vscode.TextDocument,
+    workspaceFolder: vscode.WorkspaceFolder,
     text: string,
     fileNames: readonly string[],
+    excludeFolders: readonly string[],
     token?: vscode.CancellationToken
   ): Promise<vscode.DocumentLink[]> {
-    const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
-    if (!workspaceFolder) return [];
-
     const [reactRouterRoutes, nextRoutes] = await Promise.all([
-      this.routesIndex.getRouteMap(workspaceFolder, fileNames),
-      this.nextRoutesIndex.getRouteMap(workspaceFolder, document.uri.fsPath),
+      this.routesIndex.getRouteMap(workspaceFolder, fileNames, excludeFolders),
+      this.nextRoutesIndex.getRouteMap(workspaceFolder, document.uri.fsPath, excludeFolders),
     ]);
     if (token?.isCancellationRequested) return [];
     const lookup = new RouteLookup([...reactRouterRoutes, ...nextRoutes]);
