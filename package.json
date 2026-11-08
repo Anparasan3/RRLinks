@@ -2,7 +2,7 @@
   "name": "routelinks",
   "displayName": "React Router Route Links — Remix & routes.ts",
   "description": "Clickable routes for React Router v7 and Remix. Ctrl+Click any routes.ts path or API route string in VS Code to jump straight to the file that handles it. Zero config, zero dependencies.",
-  "version": "0.1.2",
+  "version": "0.1.1",
   "publisher": "anparasan",
   "license": "MIT",
   "icon": "icon.png",
