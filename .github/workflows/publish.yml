@@ -21,10 +21,9 @@ on:
         options: [stable, preview]
         default: preview
         required: true
-      increment:
-        description: Version bump
-        type: choice
-        options: [patch, minor, major]
+      version:
+        description: "Version: patch, minor, major, or an exact X.Y.Z (e.g. 0.2.0)"
+        type: string
         default: patch
         required: true
 
@@ -47,16 +46,40 @@ jobs:
 
       - name: Cut and push the release tag
         id: cut
+        env:
+          CHANNEL: ${{ inputs.channel }}
+          VERSION_INPUT: ${{ inputs.version }}
         run: |
           # Reuses the same scripts a human would run locally, so the manual
           # and local paths can never diverge in behavior.
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          if [ "${{ inputs.channel }}" = "preview" ]; then
-            bash scripts/release-preview.sh "${{ inputs.increment }}"
+          # `bun pm version` takes either a bump keyword or an exact version.
+          # Only a plain X.Y.Z is accepted for the latter: the Marketplace
+          # rejects prerelease strings, and the -preview suffix is added to
+          # the tag by release-preview.sh, not typed here.
+          BUMP="${VERSION_INPUT#v}"
+          case "$BUMP" in
+            patch|minor|major) ;;
+            *)
+              if ! [[ "$BUMP" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                echo "::error::Version must be patch, minor, major or X.Y.Z (got '$VERSION_INPUT')"
+                exit 1
+              fi
+              SUFFIX=""
+              [ "$CHANNEL" = "preview" ] && SUFFIX="-preview"
+              if git ls-remote --exit-code --tags origin "refs/tags/v${BUMP}${SUFFIX}" >/dev/null; then
+                echo "::error::Tag v${BUMP}${SUFFIX} already exists"
+                exit 1
+              fi
+              ;;
+          esac
+
+          if [ "$CHANNEL" = "preview" ]; then
+            bash scripts/release-preview.sh "$BUMP"
           else
-            bun run release "${{ inputs.increment }}"
+            bun run release "$BUMP"
           fi
 
           TAG=$(git tag --points-at HEAD)
