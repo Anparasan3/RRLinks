@@ -210,14 +210,16 @@
 
   /* ------------------------------------------------------- analytics -- */
 
-  // Pushes a custom event to the Google Tag Manager data layer (see <head>).
-  // GTM forwards it to GA4 via a "Custom Event" trigger; if GTM is blocked
-  // or missing, the push is harmless and the page works the same.
+  // Sends a GA4 event through the Google tag loaded by the Tag Manager
+  // container (see <head>). gtag('event', ...) commands are picked up by the
+  // Google tag directly, so no extra GTM tag or trigger is needed. If the
+  // container is blocked or missing, the call is harmless.
+  window.dataLayer = window.dataLayer || [];
+  if (typeof window.gtag !== "function") {
+    window.gtag = function () { window.dataLayer.push(arguments); };
+  }
   function track(name, params) {
-    var data = { event: name };
-    for (var key in params) data[key] = params[key];
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push(data);
+    window.gtag("event", name, params || {});
   }
 
   // Which part of the page a click came from: header, hero, install, footer...
