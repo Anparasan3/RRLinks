@@ -218,8 +218,22 @@
   if (typeof window.gtag !== "function") {
     window.gtag = function () { window.dataLayer.push(arguments); };
   }
+
+  // Debug switch: open the site with ?debug_analytics and every click event
+  // is also shown live in GA4 Admin → DebugView. Remembered for the tab.
+  var debugAnalytics = /[?&]debug_analytics\b/.test(location.search);
+  try {
+    if (debugAnalytics) sessionStorage.setItem("debug_analytics", "1");
+    else debugAnalytics = sessionStorage.getItem("debug_analytics") === "1";
+  } catch (err) {
+    /* storage unavailable: rely on the URL only */
+  }
+
   function track(name, params) {
-    window.gtag("event", name, params || {});
+    var data = {};
+    for (var key in params) data[key] = params[key];
+    if (debugAnalytics) data.debug_mode = true;
+    window.gtag("event", name, data);
   }
 
   // Which part of the page a click came from: header, hero, install, footer...
